@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="match_parent" android:layout_width="match_parent" android:orientation="vertical" android:id="@+id/showstopLinearLayout">
+    <TextView android:layout_height="wrap_content" android:id="@+id/stopTitle" android:text="7351 SE Olsen and 32nd" android:textSize="10pt" android:layout_gravity="center" android:layout_width="wrap_content"></TextView>
+    <View android:background="@drawable/divider"
+    android:layout_width="fill_parent"
+    android:layout_height="2px"
+    android:layout_below="@id/stopTitle" 
+    android:id="@+id/divider" android:layout_marginTop="5px" android:layout_marginBottom="5px"/>
+    <ListView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/arrivalsListView"></ListView>
+</LinearLayout>
+ 
