@@ -4,9 +4,9 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -31,7 +31,7 @@ public class homepage extends Activity {
 	private ListView favoriteStopsListView;
 	private TextView stopIDTextBox;
 	private Button goButton;
-	private static ArrivalsDocument xmlArrivalsDoc;
+	private static ArrivalsDocument mXmlArrivalsDoc;
 	ArrayAdapter<String> listViewAdapter;
 	
 	
@@ -77,29 +77,13 @@ public class homepage extends Activity {
     	}
     }
 
-
 	protected void showStop(int stopID) {
 		String urlString = new String(getString(R.string.baseArrivalURL)+ stopID);
-        XMLHandler xmlHandler = null;
         
         
     	if (Connectivity.checkForInternetConnection(getApplicationContext()))
         {
-        	try {
-				xmlHandler = new XMLHandler(urlString);
-				xmlHandler.refreshXmlData();
-				setXmlArrivalsDoc(new ArrivalsDocument(xmlHandler.getXmlDoc()));
-			} catch (MalformedURLException e) {
-				Log.e(TAG, e.getMessage());
-			}
-        	
-        	if (xmlHandler.hasError())
-        		showError(xmlHandler.getError());
-        	else{
-        		Intent showStopIntent = new Intent();
-        		showStopIntent.setClass(getApplicationContext(), showStop.class);
-            	startActivity(showStopIntent);
-        	}
+        	new DownloadArrivalData().execute(urlString);
         }
         else{
     		Connectivity.showErrorToast(getApplicationContext());
@@ -135,13 +119,38 @@ public class homepage extends Activity {
 
 
 	public void setXmlArrivalsDoc(ArrivalsDocument xmlArrivalsDoc) {
-		homepage.xmlArrivalsDoc = xmlArrivalsDoc;
+		homepage.mXmlArrivalsDoc = xmlArrivalsDoc;
 	}
 
 
 	public ArrivalsDocument getXmlArrivalsDoc() {
-		return xmlArrivalsDoc;
+		return mXmlArrivalsDoc;
 	}
+	
+	private class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
+        protected XMLHandler doInBackground(String... urls) {
+        	XMLHandler newXmlHandler = null;
+        	try {
+        		newXmlHandler = new XMLHandler(urls[0]);
+        		newXmlHandler.refreshXmlData();
+			} catch (MalformedURLException e) {
+				Log.e(TAG, e.getMessage());
+			}
+			return newXmlHandler;
+        }
+
+        protected void onPostExecute(XMLHandler newXmlHandler) {
+            mXmlArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc());
+            
+            if (newXmlHandler.hasError())
+        		showError(newXmlHandler.getError());
+        	else{
+        		Intent showStopIntent = new Intent();
+        		showStopIntent.setClass(getApplicationContext(), showStop.class);
+            	startActivity(showStopIntent);
+        	}
+        }
+    }
     
     
 }
