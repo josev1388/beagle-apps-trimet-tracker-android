@@ -1,9 +1,14 @@
 package com.beagleapps.android.trimettracker;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,8 +19,8 @@ import android.widget.Toast;
 
 public class showStop extends Activity {
 	
-	@SuppressWarnings("unused")
 	private String TAG = "showStop";
+	private int mStopID;
 	
 	private ArrayList<Arrival> mArrivals = null;
 	private ArrivalAdapter arrivalAdapter;
@@ -43,6 +48,7 @@ public class showStop extends Activity {
 	        mArrivalsDoc = new ArrivalsDocument(ArrivalsDocument.arrivalsDoc);
 	        
 	        stopTitle.setText(mArrivalsDoc.getStopDescription());
+	        mStopID = mArrivalsDoc.getStopID();
 	        
 	        getArrivals();
 	        
@@ -85,20 +91,39 @@ public class showStop extends Activity {
 	     // Handle item selection
 	     switch (item.getItemId()) {
 	     case R.id.menuRefresh:
-	         // to do
+	         onRefreshClick();
 	         return true;
 	     case R.id.menuFavorite:
-	         onMenuFavoriteClick();
+	         onFavoriteClick();
 	         return true;
 	     default:
 	         return super.onOptionsItemSelected(item);
 	     }
 	 }
 
-	 private void onMenuFavoriteClick() {
+	private void onRefreshClick() {
+		String urlString = new String(getString(R.string.baseArrivalURL)+ 
+				mArrivalsDoc.getStopID());
+		
+		if (Connectivity.checkForInternetConnection(getApplicationContext()))
+        {
+        	new DownloadArrivalData().execute(urlString);
+        }
+        else{
+    		Connectivity.showErrorToast(getApplicationContext());
+        }
+		
+	}
+	
+	private void refreshStopList() {
+		getArrivals();
+		arrivalAdapter.notifyDataSetChanged();
+	}
+
+	private void onFavoriteClick() {
 		if (isStopFavorite()){
 			// Remove stop from favorites
-			mDbHelper.deleteFavorite(mArrivalsDoc.getStopID());
+			mDbHelper.deleteFavorite(mStopID);
 			ShowRemovedToast();
 		}
 		else{
@@ -123,31 +148,81 @@ public class showStop extends Activity {
 
 	private Favorite constructFavorite() {
 		Favorite fav = new Favorite();
-		fav.setDescription(mArrivalsDoc.getStopDescription());
-		fav.setStopID(mArrivalsDoc.getStopID());
-		fav.setDirection("");
-		fav.setRoutes("");
+		if (mArrivalsDoc != null){
+			fav.setDescription(mArrivalsDoc.getStopDescription());
+			fav.setStopID(mArrivalsDoc.getStopID());
+			fav.setDirection("");
+			fav.setRoutes("");
+		}
 		return fav;
 	}
 
 	private void getArrivals()
 	 {
-		 mArrivals = new ArrayList<Arrival>();
-		 int length = mArrivalsDoc.getNumArrivals();
+		 mArrivals.clear();
 		 
-		 for (int index = 0; index < length; index++){
-			 Arrival newArrival = new Arrival();
+		 
+		 if(mArrivalsDoc != null){
+			 int length = mArrivalsDoc.getNumArrivals();
 			 
-			 newArrival.setBusDescription(mArrivalsDoc.getBusDescription(index));
-			 newArrival.setScheduledTime(mArrivalsDoc.getScheduledTime(index));
-			 if (mArrivalsDoc.isEstimated(index)){
-				 newArrival.setArrivalTime(mArrivalsDoc.getEstimatedTime(index));
+			 for (int index = 0; index < length; index++){
+				 Arrival newArrival = new Arrival();
+				 
+				 newArrival.setBusDescription(mArrivalsDoc.getBusDescription(index));
+				 newArrival.setScheduledTime(mArrivalsDoc.getScheduledTime(index));
+				 if (mArrivalsDoc.isEstimated(index)){
+					 newArrival.setArrivalTime(mArrivalsDoc.getEstimatedTime(index));
+				 }
+				 else{
+					 newArrival.setArrivalTime("");
+				 }
+				 newArrival.setRemainingMinutes(mArrivalsDoc.getRemainingMinutes(index));
+				 mArrivals.add(newArrival);
 			 }
-			 else{
-				 newArrival.setArrivalTime("");
-			 }
-			 newArrival.setRemainingMinutes(mArrivalsDoc.getRemainingMinutes(index));
-			 mArrivals.add(newArrival);
 		 }
 	 }
+	
+	protected void showError(String error) {
+		Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
+	}
+	
+	private Context getDialogContext() {
+	    Context context;
+	    if (getParent() != null) context = getParent();
+	    else context = this;
+	    return context;
+	}
+	
+	private class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
+		private ProgressDialog dialog = new ProgressDialog(getDialogContext());
+		
+        protected XMLHandler doInBackground(String... urls) {
+        	XMLHandler newXmlHandler = null;
+        	try {
+        		newXmlHandler = new XMLHandler(urls[0]);
+        		newXmlHandler.refreshXmlData();
+			} catch (MalformedURLException e) {
+				Log.e(TAG, e.getMessage());
+			}
+			return newXmlHandler;
+        }
+
+        protected void onPreExecute() {
+        	dialog.setMessage(getString(R.string.dialogGettingArrivals));
+        	dialog.setIndeterminate(true);
+        	dialog.show();
+        }
+        
+        protected void onPostExecute(XMLHandler newXmlHandler) {
+        	dialog.dismiss();
+        	
+            mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc());
+            
+            if (newXmlHandler.hasError())
+        		showError(newXmlHandler.getError());
+        	else{
+        		refreshStopList();
+        	}
+        }
+    }
 }

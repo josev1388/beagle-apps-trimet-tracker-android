@@ -16,4 +16,6 @@
     <string name="addToFavorites">Favorite Stop</string>
     <string name="stopFavorited">Stop added to favorites</string>
     <string name="stopRemoved">Stop removed from favorites</string>
+    <string name="dialogGettingArrivals">Getting Arrivals</string>
+    <string name="errorNoStopID">Please enter a stop ID</string>
 </resources>

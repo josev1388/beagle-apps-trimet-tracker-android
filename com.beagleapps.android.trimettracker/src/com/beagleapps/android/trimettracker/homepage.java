@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -31,6 +33,7 @@ public class homepage extends Activity {
 	private ListView favoriteStopsListView;
 	private TextView stopIDTextBox;
 	private Button goButton;
+	
 	private static ArrivalsDocument mXmlArrivalsDoc;
 	ArrayAdapter<String> listViewAdapter;
 	
@@ -57,14 +60,19 @@ public class homepage extends Activity {
         
         goButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	showStop(Integer.parseInt(stopIDTextBox.getText().toString()));
+            	if (stopIDTextBox.getText().length() > 0){
+            		onStopClick(Integer.parseInt(stopIDTextBox.getText().toString()));
+            	}
+            	else{
+            		showError(getString(R.string.errorNoStopID));
+            	}
             }
         });
         
         favoriteStopsListView.setOnItemClickListener(new OnItemClickListener() {
         	@Override
         	public void onItemClick(AdapterView<?> a, View v, int position, long id) {
-        		showStop(mFavorites.get(position).getStopID());
+        		onStopClick(mFavorites.get(position).getStopID());
         	}
         });
 
@@ -77,7 +85,7 @@ public class homepage extends Activity {
     	}
     }
 
-	protected void showStop(int stopID) {
+	protected void onStopClick(int stopID) {
 		String urlString = new String(getString(R.string.baseArrivalURL)+ stopID);
         
         
@@ -89,6 +97,12 @@ public class homepage extends Activity {
     		Connectivity.showErrorToast(getApplicationContext());
         }
 		
+	}
+	
+	protected void showStop() {
+		Intent showStopIntent = new Intent();
+		showStopIntent.setClass(getApplicationContext(), showStop.class);
+    	startActivity(showStopIntent);
 	}
 
 
@@ -127,7 +141,16 @@ public class homepage extends Activity {
 		return mXmlArrivalsDoc;
 	}
 	
+	private Context getDialogContext() {
+	    Context context;
+	    if (getParent() != null) context = getParent();
+	    else context = this;
+	    return context;
+	}
+	
 	private class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
+		private ProgressDialog dialog = new ProgressDialog(getDialogContext());
+		
         protected XMLHandler doInBackground(String... urls) {
         	XMLHandler newXmlHandler = null;
         	try {
@@ -139,15 +162,21 @@ public class homepage extends Activity {
 			return newXmlHandler;
         }
 
+        protected void onPreExecute() {
+        	dialog.setMessage(getString(R.string.dialogGettingArrivals));
+        	dialog.setIndeterminate(true);
+        	dialog.show();
+        }
+        
         protected void onPostExecute(XMLHandler newXmlHandler) {
+        	dialog.dismiss();
+        	
             mXmlArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc());
             
             if (newXmlHandler.hasError())
         		showError(newXmlHandler.getError());
         	else{
-        		Intent showStopIntent = new Intent();
-        		showStopIntent.setClass(getApplicationContext(), showStop.class);
-            	startActivity(showStopIntent);
+        		showStop();
         	}
         }
     }
