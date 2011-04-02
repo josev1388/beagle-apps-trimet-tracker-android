@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content" android:layout_height="match_parent" android:id="@+id/showStopsLinearLayout">
+    <RelativeLayout android:id="@+id/relativeLayout1" android:layout_height="match_parent" android:layout_width="match_parent">
+        <TextView android:padding="10dp" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/busDescription" android:textSize="16sp" android:layout_alignParentLeft="true"></TextView>
+        <TextView android:padding="10dp" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/arrivalTime" android:textSize="18sp" android:layout_alignParentRight="true"></TextView>
+    </RelativeLayout>
+</LinearLayout>
