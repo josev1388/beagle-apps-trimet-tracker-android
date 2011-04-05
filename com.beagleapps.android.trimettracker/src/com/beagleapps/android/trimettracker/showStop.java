@@ -151,8 +151,9 @@ public class showStop extends Activity {
 		if (mArrivalsDoc != null){
 			fav.setDescription(mArrivalsDoc.getStopDescription());
 			fav.setStopID(mArrivalsDoc.getStopID());
-			fav.setDirection("");
-			fav.setRoutes("");
+			fav.setDirection(mArrivalsDoc.getDirection());
+			String routes = RoutesUtilities.parseRouteList(mArrivalsDoc.getRouteList());
+			fav.setRoutes(routes);
 		}
 		return fav;
 	}
@@ -170,11 +171,14 @@ public class showStop extends Activity {
 				 
 				 newArrival.setBusDescription(mArrivalsDoc.getBusDescription(index));
 				 newArrival.setScheduledTime(mArrivalsDoc.getScheduledTime(index));
+				 newArrival.setScheduledTimeText(mArrivalsDoc.getScheduledTimeText(index));
 				 if (mArrivalsDoc.isEstimated(index)){
 					 newArrival.setArrivalTime(mArrivalsDoc.getEstimatedTime(index));
+					 newArrival.setEstimated(true);
 				 }
 				 else{
 					 newArrival.setArrivalTime("");
+					 newArrival.setEstimated(false);
 				 }
 				 newArrival.setRemainingMinutes(mArrivalsDoc.getRemainingMinutes(index));
 				 mArrivals.add(newArrival);

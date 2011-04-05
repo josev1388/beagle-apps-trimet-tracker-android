@@ -1,5 +1,8 @@
 package com.beagleapps.android.trimettracker;
 
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 import org.w3c.dom.Document;
@@ -8,6 +11,9 @@ import org.w3c.dom.NodeList;
 
 public class ArrivalsDocument {
 
+	private static final String[] DaysOfWeek = 
+	{"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+	
 	public static Document arrivalsDoc;
 	
 	public ArrivalsDocument(Document arrivalsDoc) {
@@ -63,6 +69,32 @@ public class ArrivalsDocument {
         return scheduledTime;
 	}
 	
+	public String getScheduledTimeText(int index){
+		String timeText = null;
+        
+		Node arrival = getArrivalNodes().item(index);
+		
+		if(arrival != null){
+			long unixTime = Long.parseLong(arrival.getAttributes().getNamedItem("scheduled").getNodeValue());
+			
+			timeText = getReadableTime(unixTime);
+		}
+        return timeText;
+	}
+	
+	private String getReadableTime(long unixTime) {
+		Date arrivalTime = new Date(unixTime);
+		Date now = new Date();
+		String timeString;
+		timeString = DateFormat.getTimeInstance(DateFormat.SHORT).format(arrivalTime);
+		
+		if(now.getDay() != arrivalTime.getDay()){
+			timeString = timeString + ", " + DaysOfWeek[arrivalTime.getDay()];
+		}
+		
+		return timeString;
+	}
+
 	public String getRemainingMinutes(int index) {
 		Date currentTime = new Date();
 		String epochTimeString, timeLeftString;
@@ -110,5 +142,22 @@ public class ArrivalsDocument {
 
 	public int getNumArrivals() {
 		return getArrivalNodes().getLength();
+	}
+	
+	public ArrayList<String> getRouteList(){
+		ArrayList<String> busRouteList = new ArrayList<String>();
+		
+		for (int index = 0; index < this.getArrivalNodes().getLength(); ++index) {
+			String routeNumber = 
+				getArrivalNodes().item(index).getAttributes().getNamedItem("route").getNodeValue();;
+			
+			if (busRouteList.lastIndexOf((routeNumber)) < 0){
+				busRouteList.add(routeNumber);
+			}
+		}
+		
+		Collections.sort(busRouteList);
+		
+		return busRouteList;
 	}
 }

@@ -18,4 +18,32 @@
     <string name="stopRemoved">Stop removed from favorites</string>
     <string name="dialogGettingArrivals">Getting Arrivals</string>
     <string name="errorNoStopID">Please enter a stop ID</string>
+    <color name="Green">#4AA02C</color>
+    <color name="Blue">#0000FF</color>
+    <color name="Red">#FF0000</color>
+    <string name="scheduled">Scheduled</string>
+    <color name="Grey">#808080</color>
+    <string-array name="NamedRoutes">
+    <item>90</item>
+    <item>100</item>
+    <item>200</item>
+    <item>190</item>
+    <item>203</item>
+    <item>193</item>
+    <item>150</item>
+    <item>98</item>
+    <item>93</item>
+    </string-array>
+    <string-array name="RouteNamed">
+    <item>Red</item>
+    <item>Blue</item>
+    <item>Green</item>
+    <item>Yellow</item>
+    <item>WES</item>
+    <item>Street Car</item>
+    <item>Mall Shuttle</item>
+    <item>Shuttle</item>
+    <item>Vintage Trolley</item>
+    </string-array>
+    <color name="backgroundGrey">#e4e4e2</color>
 </resources>
