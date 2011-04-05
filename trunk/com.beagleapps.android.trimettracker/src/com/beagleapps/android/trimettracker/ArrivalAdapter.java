@@ -3,6 +3,7 @@ package com.beagleapps.android.trimettracker;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +23,9 @@ public class ArrivalAdapter extends ArrayAdapter<Arrival> {
 	// static to save the reference to the outer class and to avoid access to
 	// any members of the containing class
 	static class ViewHolder {
-		public TextView left;
-		public TextView right;
+		public TextView description;
+		public TextView timeRemaining;
+		public TextView scheduledTime;
 	}
 
 	@Override
@@ -40,16 +42,27 @@ public class ArrivalAdapter extends ArrayAdapter<Arrival> {
 			LayoutInflater inflater = context.getLayoutInflater();
 			rowView = inflater.inflate(R.layout.arrivals_list_item, null, true);
 			holder = new ViewHolder();
-			holder.left = (TextView) rowView.findViewById(R.id.busDescription);
-			holder.right = (TextView) rowView.findViewById(R.id.arrivalTime);
+			holder.description = (TextView) rowView.findViewById(R.id.busDescription);
+			holder.timeRemaining = (TextView) rowView.findViewById(R.id.arrivalTime);
+			holder.scheduledTime = (TextView) rowView.findViewById(R.id.scheduledTime);
 			rowView.setTag(holder);
 		} else {
 			holder = (ViewHolder) rowView.getTag();
 		}
 
-		holder.left.setText(items.get(position).getBusDescription());
-		holder.right.setText(items.get(position).getRemainingMinutes());
-
+		holder.description.setText(items.get(position).getBusDescription() + ":");
+		holder.timeRemaining.setText(items.get(position).getRemainingMinutes() + " min");
+		String timeString = "Scheduled: " + items.get(position).getScheduledTimeText();
+		holder.scheduledTime.setText(timeString);
+		
+		if(!items.get(position).isEstimated()){
+			holder.timeRemaining.setTextColor(Color.RED);
+		}
+		else{
+			// A different color green
+			holder.timeRemaining.setTextColor(Color.parseColor(Colors.Green));
+		}
+		
 		return rowView;
 	}
 }

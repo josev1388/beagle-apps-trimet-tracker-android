@@ -24,6 +24,8 @@ public class FavoriteAdapter extends ArrayAdapter<Favorite> {
 	static class ViewHolder {
 		public TextView description;
 		public TextView stopID;
+		public TextView direction;
+		public TextView routes;
 	}
 
 	@Override
@@ -42,13 +44,17 @@ public class FavoriteAdapter extends ArrayAdapter<Favorite> {
 			holder = new ViewHolder();
 			holder.description = (TextView) rowView.findViewById(R.id.FSRouteDescription);
 			holder.stopID = (TextView) rowView.findViewById(R.id.FSStopID);
+			holder.direction = (TextView) rowView.findViewById(R.id.FSDirection);
+			holder.routes = (TextView) rowView.findViewById(R.id.FSRoutes);
 			rowView.setTag(holder);
 		} else {
 			holder = (ViewHolder) rowView.getTag();
 		}
 
-		holder.description.setText(items.get(position).getDescription());
+		holder.description.setText(items.get(position).getDescription() + ":");
 		holder.stopID.setText(Integer.toString(items.get(position).getStopID()));
+		holder.direction.setText(items.get(position).getDirection() + ":");
+		holder.routes.setText(items.get(position).getRoutes());
 
 		return rowView;
 	}
