@@ -214,6 +214,7 @@ public class showStop extends Activity {
         protected void onPreExecute() {
         	dialog.setMessage(getString(R.string.dialogGettingArrivals));
         	dialog.setIndeterminate(true);
+        	dialog.setCancelable(false);
         	dialog.show();
         }
         
