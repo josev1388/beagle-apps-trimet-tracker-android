@@ -220,12 +220,11 @@ public class showStop extends Activity {
         
         protected void onPostExecute(XMLHandler newXmlHandler) {
         	dialog.dismiss();
-        	
-            mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc());
             
             if (newXmlHandler.hasError())
         		showError(newXmlHandler.getError());
         	else{
+        		mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc());
         		refreshStopList();
         	}
         }
