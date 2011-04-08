@@ -46,4 +46,5 @@
     <item>Vintage Trolley</item>
     </string-array>
     <color name="backgroundGrey">#e4e4e2</color>
+    <color name="white">#ffffff</color>
 </resources>
