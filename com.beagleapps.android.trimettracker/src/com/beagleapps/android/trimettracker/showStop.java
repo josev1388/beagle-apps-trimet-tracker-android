@@ -5,9 +5,13 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class showStop extends Activity {
+
+	private final int COUNTDOWN_DELAY = 5000;
+	private final int REFRESH_DELAY = 30000;
+	private final int MAX_AGE = 10;
 	
 	private String TAG = "showStop";
 	private int mStopID;
@@ -32,6 +40,10 @@ public class showStop extends Activity {
 	private DBAdapter mDbHelper;
 	private boolean mIsFavorite;
 	
+	private UnlockReciever mUnlockReciever;
+	private Handler mTimersHandler = new Handler();
+
+	
 	 @Override
 	    public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
@@ -45,7 +57,8 @@ public class showStop extends Activity {
 	        stopTitle = (TextView)findViewById(R.id.stopTitle);
 	        
 	        mArrivals = new ArrayList<Arrival>();
-	        mArrivalsDoc = new ArrivalsDocument(ArrivalsDocument.arrivalsDoc);
+	        mArrivalsDoc = new ArrivalsDocument(ArrivalsDocument.mArrivalsDoc, 
+	        		ArrivalsDocument.mRequestTime);
 	        
 	        stopTitle.setText(mArrivalsDoc.getStopDescription());
 	        mStopID = mArrivalsDoc.getStopID();
@@ -54,6 +67,42 @@ public class showStop extends Activity {
 	        
 	        arrivalAdapter = new ArrivalAdapter(this, mArrivals);
 	        arrivalsListView.setAdapter(arrivalAdapter);
+	        
+	        mUnlockReciever = new UnlockReciever();
+	 }
+	 
+	 // Reciever tells the app to refresh on unlock,
+	 // If the window has focus
+	 @Override 
+	 protected void onResume(){
+		 super.onResume();
+		 //registerReceiver(mUnlockReciever, new IntentFilter(Intent.ACTION_USER_PRESENT));
+		 startTimers();
+		 if (isDataOutOfDate()){
+			 //showError("Out of date");
+			 refreshArrivalData();
+		 }
+	 }
+
+	private boolean isDataOutOfDate() {
+		return (mArrivalsDoc.getAge() >= MAX_AGE);
+	}
+
+	@Override 
+	 protected void onPause(){
+		 super.onPause();
+		 stopTimers();
+		 //unregisterReceiver(mUnlockReciever);
+	 }
+	
+	 private void startTimers() {
+		 mTimersHandler.postDelayed(mCountDownTask, COUNTDOWN_DELAY);
+		 mTimersHandler.postDelayed(mRefreshTask, REFRESH_DELAY);
+	 }
+	 
+	 private void stopTimers() {
+		mTimersHandler.removeCallbacks(mRefreshTask);
+		mTimersHandler.removeCallbacks(mCountDownTask);
 	 }
 	 
 	 private boolean isStopFavorite() {
@@ -102,6 +151,10 @@ public class showStop extends Activity {
 	 }
 
 	private void onRefreshClick() {
+		refreshArrivalData();
+	}
+	
+	private void refreshArrivalData() {
 		String urlString = new String(getString(R.string.baseArrivalURL)+ 
 				mArrivalsDoc.getStopID());
 		
@@ -114,7 +167,7 @@ public class showStop extends Activity {
         }
 		
 	}
-	
+
 	private void refreshStopList() {
 		getArrivals();
 		arrivalAdapter.notifyDataSetChanged();
@@ -224,9 +277,38 @@ public class showStop extends Activity {
             if (newXmlHandler.hasError())
         		showError(newXmlHandler.getError());
         	else{
-        		mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc());
+        		mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(), 
+        				newXmlHandler.getRequestTime());
         		refreshStopList();
         	}
         }
     }
+	
+	public class UnlockReciever extends BroadcastReceiver {
+
+	    @Override
+	    public void onReceive(Context context, Intent intent) {
+	        Log.i(UnlockReciever.class.getSimpleName(),
+	              "received broadcast");
+	        if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
+	        	showError("Unlock");
+	        	refreshArrivalData();
+	        }
+	    }
+
+	}
+	
+	private Runnable mCountDownTask = new Runnable() {
+		   public void run() {
+			   refreshStopList();
+		       mTimersHandler.postDelayed(mCountDownTask, COUNTDOWN_DELAY);
+		   }
+	};
+	
+	private Runnable mRefreshTask = new Runnable() {
+		   public void run() {
+			   refreshArrivalData();
+		       mTimersHandler.postDelayed(mRefreshTask, REFRESH_DELAY);
+		   }
+	};
 }

@@ -2,6 +2,7 @@ package com.beagleapps.android.trimettracker;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,6 +16,7 @@ public class XMLHandler {
 
 	private Document document;
 	private URL url;
+	private long mRequestTime;
 	
 	public XMLHandler(String newUrl) throws MalformedURLException {
 		url = new URL(newUrl);
@@ -29,6 +31,7 @@ public class XMLHandler {
 			db = dbf.newDocumentBuilder();
 			document = db.parse(new InputSource(url.openStream()));
 			document.getDocumentElement().normalize();
+			mRequestTime = new Date().getTime();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,5 +71,9 @@ public class XMLHandler {
 		}
 		
 		return errorMessage;
+	}
+
+	public long getRequestTime() {
+		return mRequestTime;
 	}
 }

@@ -14,14 +14,16 @@ public class ArrivalsDocument {
 	private static final String[] DaysOfWeek = 
 	{"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
 	
-	public static Document arrivalsDoc;
+	public static Document mArrivalsDoc;
+	public static long mRequestTime;
 	
-	public ArrivalsDocument(Document arrivalsDoc) {
-		ArrivalsDocument.arrivalsDoc = arrivalsDoc;
+	public ArrivalsDocument(Document arrivalsDoc, long requestTime) {
+		ArrivalsDocument.mArrivalsDoc = arrivalsDoc;
+		mRequestTime = requestTime;
 	}
 	
 	public int getStopID(){
-		NodeList nodeList = arrivalsDoc.getElementsByTagName("location");
+		NodeList nodeList = mArrivalsDoc.getElementsByTagName("location");
         
 		Node locationNode = nodeList.item(0);
 		String stopString = locationNode.getAttributes().getNamedItem("locid").getNodeValue();
@@ -29,18 +31,18 @@ public class ArrivalsDocument {
 	}
 	
 	public NodeList getArrivalNodes(){
-		return arrivalsDoc.getElementsByTagName("arrival");    
+		return mArrivalsDoc.getElementsByTagName("arrival");    
 	}
 	
 	public String getStopDescription(){
-		NodeList nodeList = arrivalsDoc.getElementsByTagName("location");
+		NodeList nodeList = mArrivalsDoc.getElementsByTagName("location");
 	        
 		Node locationNode = nodeList.item(0);
         return locationNode.getAttributes().getNamedItem("desc").getNodeValue();
 	}
 	
 	public String getDirection(){
-		NodeList nodeList = arrivalsDoc.getElementsByTagName("location");
+		NodeList nodeList = mArrivalsDoc.getElementsByTagName("location");
         
 		Node locationNode = nodeList.item(0);
         return locationNode.getAttributes().getNamedItem("dir").getNodeValue();
@@ -67,6 +69,17 @@ public class ArrivalsDocument {
 			scheduledTime = arrival.getAttributes().getNamedItem("scheduled").getNodeValue();
 		}
         return scheduledTime;
+	}
+	
+	// Returns the time of the request in milliseconds since epoch
+	public String getRequestTime(){
+        Node resultSet = mArrivalsDoc.getElementsByTagName("resultSet").item(0);
+		String requestTime = null;
+		
+		if(resultSet != null){
+			requestTime = resultSet.getAttributes().getNamedItem("queryTime").getNodeValue();
+		}
+        return requestTime;
 	}
 	
 	public String getScheduledTimeText(int index){
@@ -159,5 +172,10 @@ public class ArrivalsDocument {
 		Collections.sort(busRouteList);
 		
 		return busRouteList;
+	}
+
+	// Returns number of seconds since the time of the request
+	public int getAge() {
+		return (int) ((new Date().getTime() - mRequestTime)/1000);
 	}
 }
