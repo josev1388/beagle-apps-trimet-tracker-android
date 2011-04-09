@@ -174,7 +174,8 @@ public class homepage extends Activity {
         protected void onPostExecute(XMLHandler newXmlHandler) {
         	dialog.dismiss();
         	
-            mXmlArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc());
+            mXmlArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(),
+            		newXmlHandler.getRequestTime());
             
             if (newXmlHandler.hasError())
         		showError(newXmlHandler.getError());
