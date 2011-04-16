@@ -22,87 +22,87 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class homepage extends Activity {
-    /** Called when the activity is first created. */
-	
+	/** Called when the activity is first created. */
+
 	private String TAG = "homepage";
-	
+
 	private ArrayList<Favorite> mFavorites = null;
 	private FavoriteAdapter favoriteAdapter;
 	private DBAdapter mDbHelper;
-	
+
 	private ListView favoriteStopsListView;
 	private TextView stopIDTextBox;
 	private Button goButton;
-	
+
 	private static ArrivalsDocument mXmlArrivalsDoc;
 	ArrayAdapter<String> listViewAdapter;
-	
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.main);
-        
-        mDbHelper = new DBAdapter(this);
-		mDbHelper.open();
-        
-        favoriteStopsListView = (ListView)findViewById(R.id.favoriteStopsListView);
-        goButton = (Button)findViewById(R.id.goButton);
-        stopIDTextBox = (TextView)findViewById(R.id.stopIDTextBox);
-        
-        mFavorites = new ArrayList<Favorite>();
-        
-        getFavorites();
-        
-        favoriteAdapter = new FavoriteAdapter(this, mFavorites);
-        favoriteStopsListView.setAdapter(favoriteAdapter);
-        
-        goButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            	if (stopIDTextBox.getText().length() > 0){
-            		onStopClick(Integer.parseInt(stopIDTextBox.getText().toString()));
-            	}
-            	else{
-            		showError(getString(R.string.errorNoStopID));
-            	}
-            }
-        });
-        
-        favoriteStopsListView.setOnItemClickListener(new OnItemClickListener() {
-        	@Override
-        	public void onItemClick(AdapterView<?> a, View v, int position, long id) {
-        		onStopClick(mFavorites.get(position).getStopID());
-        	}
-        });
 
-    }
-    
-    public void onWindowFocusChanged (boolean hasFocus){
-    	if(hasFocus){
-    		getFavorites();
-    		favoriteAdapter.notifyDataSetChanged();
-    	}
-    }
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.main);
+
+		mDbHelper = new DBAdapter(this);
+		mDbHelper.open();
+
+		favoriteStopsListView = (ListView)findViewById(R.id.favoriteStopsListView);
+		goButton = (Button)findViewById(R.id.goButton);
+		stopIDTextBox = (TextView)findViewById(R.id.stopIDTextBox);
+
+		mFavorites = new ArrayList<Favorite>();
+
+		getFavorites();
+
+		favoriteAdapter = new FavoriteAdapter(this, mFavorites);
+		favoriteStopsListView.setAdapter(favoriteAdapter);
+
+		goButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (stopIDTextBox.getText().length() > 0){
+					onStopClick(Integer.parseInt(stopIDTextBox.getText().toString()));
+				}
+				else{
+					showError(getString(R.string.errorNoStopID));
+				}
+			}
+		});
+
+		favoriteStopsListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+				onStopClick(mFavorites.get(position).getStopID());
+			}
+		});
+
+	}
+
+	public void onWindowFocusChanged (boolean hasFocus){
+		if(hasFocus){
+			getFavorites();
+			favoriteAdapter.notifyDataSetChanged();
+		}
+	}
 
 	protected void onStopClick(int stopID) {
 		String urlString = new String(getString(R.string.baseArrivalURL)+ stopID);
-        
-        
-    	if (Connectivity.checkForInternetConnection(getApplicationContext()))
-        {
-        	new DownloadArrivalData().execute(urlString);
-        }
-        else{
-    		Connectivity.showErrorToast(getApplicationContext());
-        }
-		
+
+
+		if (Connectivity.checkForInternetConnection(getApplicationContext()))
+		{
+			new DownloadArrivalData().execute(urlString);
+		}
+		else{
+			Connectivity.showErrorToast(getApplicationContext());
+		}
+
 	}
-	
+
 	protected void showStop() {
 		Intent showStopIntent = new Intent();
 		showStopIntent.setClass(getApplicationContext(), showStop.class);
-    	startActivity(showStopIntent);
+		startActivity(showStopIntent);
 	}
 
 
@@ -114,7 +114,7 @@ public class homepage extends Activity {
 	private void getFavorites() {
 		Cursor cursor = mDbHelper.fetchAllFavorites();
 		cursor.moveToFirst();
-		
+
 		mFavorites.clear();
 		while (!cursor.isAfterLast()){
 			Favorite fav = constructFavoriteFromCursor(cursor); 
@@ -142,48 +142,48 @@ public class homepage extends Activity {
 	public ArrivalsDocument getXmlArrivalsDoc() {
 		return mXmlArrivalsDoc;
 	}
-	
+
 	private Context getDialogContext() {
-	    Context context;
-	    if (getParent() != null) context = getParent();
-	    else context = this;
-	    return context;
+		Context context;
+		if (getParent() != null) context = getParent();
+		else context = this;
+		return context;
 	}
-	
+
 	private class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
 		private ProgressDialog dialog = new ProgressDialog(getDialogContext());
-		
-        protected XMLHandler doInBackground(String... urls) {
-        	XMLHandler newXmlHandler = null;
-        	try {
-        		newXmlHandler = new XMLHandler(urls[0]);
-        		newXmlHandler.refreshXmlData();
+
+		protected XMLHandler doInBackground(String... urls) {
+			XMLHandler newXmlHandler = null;
+			try {
+				newXmlHandler = new XMLHandler(urls[0]);
+				newXmlHandler.refreshXmlData();
 			} catch (MalformedURLException e) {
 				Log.e(TAG, e.getMessage());
 			}
 			return newXmlHandler;
-        }
+		}
 
-        protected void onPreExecute() {
-        	dialog.setMessage(getString(R.string.dialogGettingArrivals));
-        	dialog.setIndeterminate(true);
-        	dialog.setCancelable(false);
-        	dialog.show();
-        }
-        
-        protected void onPostExecute(XMLHandler newXmlHandler) {
-        	dialog.dismiss();
-        	
-            mXmlArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(),
-            		newXmlHandler.getRequestTime());
-            
-            if (newXmlHandler.hasError())
-        		showError(newXmlHandler.getError());
-        	else{
-        		showStop();
-        	}
-        }
-    }
-    
-    
+		protected void onPreExecute() {
+			dialog.setMessage(getString(R.string.dialogGettingArrivals));
+			dialog.setIndeterminate(true);
+			dialog.setCancelable(false);
+			dialog.show();
+		}
+
+		protected void onPostExecute(XMLHandler newXmlHandler) {
+			dialog.dismiss();
+
+			mXmlArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(),
+					newXmlHandler.getRequestTime());
+
+			if (newXmlHandler.hasError())
+				showError(newXmlHandler.getError());
+			else{
+				showStop();
+			}
+		}
+	}
+
+
 }

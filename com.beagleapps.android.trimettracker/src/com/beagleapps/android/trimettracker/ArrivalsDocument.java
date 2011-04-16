@@ -111,8 +111,7 @@ public class ArrivalsDocument {
 	public String getRemainingMinutes(int index) {
 		Date currentTime = new Date();
 		String epochTimeString, timeLeftString;
-		long epochTimeLong, timeLeftLong;
-		
+		long epochTimeLong, minutes;
 		
 		if(getArrivalNodes().item(index) != null){
 			if (isEstimated(index))
@@ -122,15 +121,36 @@ public class ArrivalsDocument {
 			
 			epochTimeLong = Long.parseLong(epochTimeString);
 			
-			timeLeftLong = ((epochTimeLong - currentTime.getTime())/1000)/60;
+			minutes = ((epochTimeLong - currentTime.getTime())/1000)/60;
 			
-			timeLeftString = Long.toString(timeLeftLong);
+			if (minutes >= 60){
+				timeLeftString = getLongWaitTime(minutes);
+			}
+			else{
+				timeLeftString = Long.toString(minutes) + " min";
+			}
 		}
 		else{
 			timeLeftString = "Error";
 		}
 		
 		return timeLeftString;
+	}
+
+	private String getLongWaitTime(long minutes) {
+		String timeString = Long.toString(minutes);
+		
+		// Hours
+		if (minutes >= 60){
+			timeString = Long.toString(minutes/60) + " hour(s)";
+			
+			// Days
+			if (minutes >= 60*24){
+				timeString = Long.toString(minutes/60/24) + " day(s)";
+			}
+		}
+		
+		return timeString;
 	}
 
 	public String getEstimatedTime(int index){

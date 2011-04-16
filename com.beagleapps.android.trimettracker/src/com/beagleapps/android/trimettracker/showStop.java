@@ -8,7 +8,6 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,146 +25,152 @@ public class showStop extends Activity {
 	private final int COUNTDOWN_DELAY = 5000;
 	private final int REFRESH_DELAY = 30000;
 	private final int MAX_AGE = 10;
-	
+
 	private String TAG = "showStop";
 	private int mStopID;
-	
+
 	private ArrayList<Arrival> mArrivals = null;
 	private ArrivalAdapter arrivalAdapter;
-	
-	private TextView stopTitle;
-	private ListView arrivalsListView;
+
+	private TextView vStopTitle;
+	private TextView vDirection;
+	private ListView vArrivalsListView;
 	private ArrivalsDocument mArrivalsDoc;
-	
+
 	private DBAdapter mDbHelper;
 	private boolean mIsFavorite;
-	
-	private UnlockReciever mUnlockReciever;
+
 	private Handler mTimersHandler = new Handler();
 
-	
-	 @Override
-	    public void onCreate(Bundle savedInstanceState) {
-	        super.onCreate(savedInstanceState);
-	        requestWindowFeature(Window.FEATURE_NO_TITLE);
-	        setContentView(R.layout.showstop);
-	        
-	        mDbHelper = new DBAdapter(this);
-			mDbHelper.open();
-	        
-	        arrivalsListView = (ListView)findViewById(R.id.arrivalsListView);
-	        stopTitle = (TextView)findViewById(R.id.stopTitle);
-	        
-	        mArrivals = new ArrayList<Arrival>();
-	        mArrivalsDoc = new ArrivalsDocument(ArrivalsDocument.mArrivalsDoc, 
-	        		ArrivalsDocument.mRequestTime);
-	        
-	        stopTitle.setText(mArrivalsDoc.getStopDescription());
-	        mStopID = mArrivalsDoc.getStopID();
-	        
-	        getArrivals();
-	        
-	        arrivalAdapter = new ArrivalAdapter(this, mArrivals);
-	        arrivalsListView.setAdapter(arrivalAdapter);
-	        
-	        mUnlockReciever = new UnlockReciever();
-	 }
-	 
-	 // Reciever tells the app to refresh on unlock,
-	 // If the window has focus
-	 @Override 
-	 protected void onResume(){
-		 super.onResume();
-		 //registerReceiver(mUnlockReciever, new IntentFilter(Intent.ACTION_USER_PRESENT));
-		 startTimers();
-		 if (isDataOutOfDate()){
-			 //showError("Out of date");
-			 refreshArrivalData();
-		 }
-	 }
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.showstop);
+
+		mDbHelper = new DBAdapter(this);
+		mDbHelper.open();
+
+		vArrivalsListView = (ListView)findViewById(R.id.SS_ArrivalsListView);
+		vStopTitle = (TextView)findViewById(R.id.SS_StopTitle);
+		vDirection= (TextView)findViewById(R.id.SS_StopID);
+
+		mArrivals = new ArrayList<Arrival>();
+		mArrivalsDoc = new ArrivalsDocument(ArrivalsDocument.mArrivalsDoc, 
+				ArrivalsDocument.mRequestTime);
+
+		mStopID = mArrivalsDoc.getStopID();
+		vDirection.setText(mArrivalsDoc.getDirection());
+		vStopTitle.setText(mStopID + ": " + mArrivalsDoc.getStopDescription());
+		
+		getArrivals();
+
+		arrivalAdapter = new ArrivalAdapter(this, mArrivals);
+		vArrivalsListView.setAdapter(arrivalAdapter);
+	}
+
+	// Reciever tells the app to refresh on unlock,
+	// If the window has focus
+	@Override 
+	protected void onResume(){
+		super.onResume();
+		startTimers();
+	}
 
 	private boolean isDataOutOfDate() {
 		return (mArrivalsDoc.getAge() >= MAX_AGE);
 	}
 
 	@Override 
-	 protected void onPause(){
-		 super.onPause();
-		 stopTimers();
-		 //unregisterReceiver(mUnlockReciever);
-	 }
-	
-	 private void startTimers() {
-		 mTimersHandler.postDelayed(mCountDownTask, COUNTDOWN_DELAY);
-		 mTimersHandler.postDelayed(mRefreshTask, REFRESH_DELAY);
-	 }
-	 
-	 private void stopTimers() {
+	protected void onPause(){
+		super.onPause();
+		stopTimers();
+	}
+
+	public void onWindowFocusChanged (boolean hasFocus){
+		if (hasFocus && isDataOutOfDate()){
+			refreshArrivalData();
+			resetTimers();
+		}
+	}
+
+	private void startTimers() {
+		mTimersHandler.postDelayed(mCountDownTask, COUNTDOWN_DELAY);
+		mTimersHandler.postDelayed(mRefreshTask, REFRESH_DELAY);
+	}
+
+	private void stopTimers() {
 		mTimersHandler.removeCallbacks(mRefreshTask);
 		mTimersHandler.removeCallbacks(mCountDownTask);
-	 }
-	 
-	 private boolean isStopFavorite() {
+	}
+	
+	private void resetTimers() {
+		stopTimers();
+		startTimers();
+	}
+
+	private boolean isStopFavorite() {
 		int stopID = mArrivalsDoc.getStopID();
-		
+
 		mIsFavorite = mDbHelper.checkForFavorite(stopID);
-		
+
 		return mIsFavorite;
 	}
 
 	@Override
-	 public boolean onCreateOptionsMenu(Menu menu) {
-	     MenuInflater inflater = getMenuInflater();
-	     inflater.inflate(R.menu.showstop_menu, menu);
-	     return true;
-	 }
-	
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.showstop_menu, menu);
+		return true;
+	}
+
 	@Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+	public boolean onPrepareOptionsMenu(Menu menu) {
 		// See if the stop is favorited
 		MenuItem favoriteButton = menu.findItem(R.id.menuFavorite);
-	     if (isStopFavorite()){
-	    	 favoriteButton.setTitle(R.string.favorited);
-	    	 favoriteButton.setIcon(R.drawable.rate_star_med_on);
-	     }
-	     else{
-	    	 favoriteButton.setTitle(R.string.addToFavorites);
-	    	 favoriteButton.setIcon(R.drawable.ic_menu_star);
-	     }
-        return super.onPrepareOptionsMenu(menu);
-    }
-	 
-	 @Override
-	 public boolean onOptionsItemSelected(MenuItem item) {
-	     // Handle item selection
-	     switch (item.getItemId()) {
-	     case R.id.menuRefresh:
-	         onRefreshClick();
-	         return true;
-	     case R.id.menuFavorite:
-	         onFavoriteClick();
-	         return true;
-	     default:
-	         return super.onOptionsItemSelected(item);
-	     }
-	 }
+		if (isStopFavorite()){
+			favoriteButton.setTitle(R.string.favorited);
+			favoriteButton.setIcon(R.drawable.rate_star_med_on);
+		}
+		else{
+			favoriteButton.setTitle(R.string.addToFavorites);
+			favoriteButton.setIcon(R.drawable.ic_menu_star);
+		}
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.menuRefresh:
+			onRefreshClick();
+			return true;
+		case R.id.menuFavorite:
+			onFavoriteClick();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
 	private void onRefreshClick() {
 		refreshArrivalData();
 	}
-	
+
 	private void refreshArrivalData() {
 		String urlString = new String(getString(R.string.baseArrivalURL)+ 
 				mArrivalsDoc.getStopID());
-		
+
 		if (Connectivity.checkForInternetConnection(getApplicationContext()))
-        {
-        	new DownloadArrivalData().execute(urlString);
-        }
-        else{
-    		Connectivity.showErrorToast(getApplicationContext());
-        }
-		
+		{
+			new DownloadArrivalData().execute(urlString);
+		}
+		else{
+			Connectivity.showErrorToast(getApplicationContext());
+		}
+
 	}
 
 	private void refreshStopList() {
@@ -184,19 +189,19 @@ public class showStop extends Activity {
 			mDbHelper.createFavorite(constructFavorite());
 			ShowAddedToast();
 		}
-		
+
 	}
 
 	private void ShowAddedToast() {
 		Toast.makeText(getApplicationContext(), getString(R.string.stopFavorited),
 				Toast.LENGTH_SHORT).show();
-		
+
 	}
-	
+
 	private void ShowRemovedToast() {
 		Toast.makeText(getApplicationContext(), getString(R.string.stopRemoved),
 				Toast.LENGTH_SHORT).show();
-		
+
 	}
 
 	private Favorite constructFavorite() {
@@ -212,103 +217,103 @@ public class showStop extends Activity {
 	}
 
 	private void getArrivals()
-	 {
-		 mArrivals.clear();
-		 
-		 
-		 if(mArrivalsDoc != null){
-			 int length = mArrivalsDoc.getNumArrivals();
-			 
-			 for (int index = 0; index < length; index++){
-				 Arrival newArrival = new Arrival();
-				 
-				 newArrival.setBusDescription(mArrivalsDoc.getBusDescription(index));
-				 newArrival.setScheduledTime(mArrivalsDoc.getScheduledTime(index));
-				 newArrival.setScheduledTimeText(mArrivalsDoc.getScheduledTimeText(index));
-				 if (mArrivalsDoc.isEstimated(index)){
-					 newArrival.setArrivalTime(mArrivalsDoc.getEstimatedTime(index));
-					 newArrival.setEstimated(true);
-				 }
-				 else{
-					 newArrival.setArrivalTime("");
-					 newArrival.setEstimated(false);
-				 }
-				 newArrival.setRemainingMinutes(mArrivalsDoc.getRemainingMinutes(index));
-				 mArrivals.add(newArrival);
-			 }
-		 }
-	 }
-	
+	{
+		mArrivals.clear();
+
+
+		if(mArrivalsDoc != null){
+			int length = mArrivalsDoc.getNumArrivals();
+
+			for (int index = 0; index < length; index++){
+				Arrival newArrival = new Arrival();
+
+				newArrival.setBusDescription(mArrivalsDoc.getBusDescription(index));
+				newArrival.setScheduledTime(mArrivalsDoc.getScheduledTime(index));
+				newArrival.setScheduledTimeText(mArrivalsDoc.getScheduledTimeText(index));
+				if (mArrivalsDoc.isEstimated(index)){
+					newArrival.setArrivalTime(mArrivalsDoc.getEstimatedTime(index));
+					newArrival.setEstimated(true);
+				}
+				else{
+					newArrival.setArrivalTime("");
+					newArrival.setEstimated(false);
+				}
+				newArrival.setRemainingMinutes(mArrivalsDoc.getRemainingMinutes(index));
+				mArrivals.add(newArrival);
+			}
+		}
+	}
+
 	protected void showError(String error) {
 		Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
 	}
-	
+
 	private Context getDialogContext() {
-	    Context context;
-	    if (getParent() != null) context = getParent();
-	    else context = this;
-	    return context;
+		Context context;
+		if (getParent() != null) context = getParent();
+		else context = this;
+		return context;
 	}
-	
+
 	private class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
 		private ProgressDialog dialog = new ProgressDialog(getDialogContext());
-		
-        protected XMLHandler doInBackground(String... urls) {
-        	XMLHandler newXmlHandler = null;
-        	try {
-        		newXmlHandler = new XMLHandler(urls[0]);
-        		newXmlHandler.refreshXmlData();
+
+		protected XMLHandler doInBackground(String... urls) {
+			XMLHandler newXmlHandler = null;
+			try {
+				newXmlHandler = new XMLHandler(urls[0]);
+				newXmlHandler.refreshXmlData();
 			} catch (MalformedURLException e) {
 				Log.e(TAG, e.getMessage());
 			}
 			return newXmlHandler;
-        }
+		}
 
-        protected void onPreExecute() {
-        	dialog.setMessage(getString(R.string.dialogGettingArrivals));
-        	dialog.setIndeterminate(true);
-        	dialog.setCancelable(false);
-        	dialog.show();
-        }
-        
-        protected void onPostExecute(XMLHandler newXmlHandler) {
-        	dialog.dismiss();
-            
-            if (newXmlHandler.hasError())
-        		showError(newXmlHandler.getError());
-        	else{
-        		mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(), 
-        				newXmlHandler.getRequestTime());
-        		refreshStopList();
-        	}
-        }
-    }
-	
+		protected void onPreExecute() {
+			dialog.setMessage(getString(R.string.dialogGettingArrivals));
+			dialog.setIndeterminate(true);
+			dialog.setCancelable(false);
+			dialog.show();
+		}
+
+		protected void onPostExecute(XMLHandler newXmlHandler) {
+			dialog.dismiss();
+
+			if (newXmlHandler.hasError())
+				showError(newXmlHandler.getError());
+			else{
+				mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(), 
+						newXmlHandler.getRequestTime());
+				refreshStopList();
+			}
+		}
+	}
+
 	public class UnlockReciever extends BroadcastReceiver {
 
-	    @Override
-	    public void onReceive(Context context, Intent intent) {
-	        Log.i(UnlockReciever.class.getSimpleName(),
-	              "received broadcast");
-	        if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
-	        	showError("Unlock");
-	        	refreshArrivalData();
-	        }
-	    }
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.i(UnlockReciever.class.getSimpleName(),
+					"received broadcast");
+			if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
+				showError("Unlock");
+				refreshArrivalData();
+			}
+		}
 
 	}
-	
+
 	private Runnable mCountDownTask = new Runnable() {
-		   public void run() {
-			   refreshStopList();
-		       mTimersHandler.postDelayed(mCountDownTask, COUNTDOWN_DELAY);
-		   }
+		public void run() {
+			refreshStopList();
+			mTimersHandler.postDelayed(mCountDownTask, COUNTDOWN_DELAY);
+		}
 	};
-	
+
 	private Runnable mRefreshTask = new Runnable() {
-		   public void run() {
-			   refreshArrivalData();
-		       mTimersHandler.postDelayed(mRefreshTask, REFRESH_DELAY);
-		   }
+		public void run() {
+			refreshArrivalData();
+			mTimersHandler.postDelayed(mRefreshTask, REFRESH_DELAY);
+		}
 	};
 }
