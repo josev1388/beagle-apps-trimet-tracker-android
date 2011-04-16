@@ -51,7 +51,7 @@ public class ArrivalAdapter extends ArrayAdapter<Arrival> {
 		}
 
 		holder.description.setText(items.get(position).getBusDescription() + ":");
-		holder.timeRemaining.setText(items.get(position).getRemainingMinutes() + " min");
+		holder.timeRemaining.setText(items.get(position).getRemainingMinutes());
 		String timeString = "Scheduled: " + items.get(position).getScheduledTimeText();
 		holder.scheduledTime.setText(timeString);
 		
