@@ -5,9 +5,6 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,7 +23,7 @@ public class showStop extends Activity {
 	private final int REFRESH_DELAY = 30000;
 	private final int MAX_AGE = 10;
 
-	private String TAG = "showStop";
+	String TAG = "showStop";
 	private int mStopID;
 
 	private ArrayList<Arrival> mArrivals = null;
@@ -41,6 +38,8 @@ public class showStop extends Activity {
 	private boolean mIsFavorite;
 
 	private Handler mTimersHandler = new Handler();
+	private DownloadArrivalData downloadTask = null;
+	private ProgressDialog mDialog;
 
 
 	@Override
@@ -48,6 +47,7 @@ public class showStop extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.showstop);
+
 
 		mDbHelper = new DBAdapter(this);
 		mDbHelper.open();
@@ -63,11 +63,24 @@ public class showStop extends Activity {
 		mStopID = mArrivalsDoc.getStopID();
 		vDirection.setText(mArrivalsDoc.getDirection());
 		vStopTitle.setText(mStopID + ": " + mArrivalsDoc.getStopDescription());
-		
+
 		getArrivals();
 
 		arrivalAdapter = new ArrivalAdapter(this, mArrivals);
 		vArrivalsListView.setAdapter(arrivalAdapter);
+
+		downloadTask = (DownloadArrivalData)getLastNonConfigurationInstance();
+		setupDialog();
+		
+		if (downloadTask != null){
+			downloadTask.attach(this);
+			if (downloadTask.isDone()){
+				dismissDialog();
+			}
+			else{
+				showDialog();
+			}
+		}
 	}
 
 	// Reciever tells the app to refresh on unlock,
@@ -104,7 +117,7 @@ public class showStop extends Activity {
 		mTimersHandler.removeCallbacks(mRefreshTask);
 		mTimersHandler.removeCallbacks(mCountDownTask);
 	}
-	
+
 	private void resetTimers() {
 		stopTimers();
 		startTimers();
@@ -165,7 +178,8 @@ public class showStop extends Activity {
 
 		if (Connectivity.checkForInternetConnection(getApplicationContext()))
 		{
-			new DownloadArrivalData().execute(urlString);
+			downloadTask = new DownloadArrivalData(this);
+			downloadTask.execute(urlString);
 		}
 		else{
 			Connectivity.showErrorToast(getApplicationContext());
@@ -216,6 +230,28 @@ public class showStop extends Activity {
 		return fav;
 	}
 
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		downloadTask.detach();
+
+		return(downloadTask);
+	}
+
+	private void setupDialog(){
+		mDialog = new ProgressDialog(this);
+		mDialog.setMessage(getString(R.string.dialogGettingArrivals));
+		mDialog.setIndeterminate(true);
+		mDialog.setCancelable(false);
+	}
+
+	private void showDialog(){
+		mDialog.show();
+	}
+
+	private void dismissDialog(){
+		mDialog.dismiss();
+	}
+
 	private void getArrivals()
 	{
 		mArrivals.clear();
@@ -248,15 +284,28 @@ public class showStop extends Activity {
 		Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
 	}
 
-	private Context getDialogContext() {
-		Context context;
-		if (getParent() != null) context = getParent();
-		else context = this;
-		return context;
-	}
+	private static class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
+		private showStop activity = null;
+		private boolean isDone = false;
+		private final String TAG = "DownloadArrivalData asyncTask";
 
-	private class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
-		private ProgressDialog dialog = new ProgressDialog(getDialogContext());
+		DownloadArrivalData(showStop activity) {
+			attach(activity);
+		}
+
+		public boolean isDone() {
+			return isDone;
+		}
+
+		private void attach(showStop activity) {
+			this.activity = activity;
+
+		}
+
+		private void detach() {
+			activity = null;
+
+		}
 
 		protected XMLHandler doInBackground(String... urls) {
 			XMLHandler newXmlHandler = null;
@@ -270,38 +319,35 @@ public class showStop extends Activity {
 		}
 
 		protected void onPreExecute() {
-			dialog.setMessage(getString(R.string.dialogGettingArrivals));
-			dialog.setIndeterminate(true);
-			dialog.setCancelable(false);
-			dialog.show();
+			isDone = false;
+			
+			if (activity != null){
+				activity.showDialog();
+			}
+			else{
+				Log.w(TAG, "showStop activity is null");
+			}
 		}
 
 		protected void onPostExecute(XMLHandler newXmlHandler) {
-			dialog.dismiss();
-
-			if (newXmlHandler.hasError())
-				showError(newXmlHandler.getError());
+			isDone = true;
+			
+			if (activity != null){
+				activity.dismissDialog();
+				if (newXmlHandler.hasError())
+					activity.showError(newXmlHandler.getError());
+				else{
+					activity.mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(), 
+							newXmlHandler.getRequestTime());
+					activity.refreshStopList();
+				}
+			}
 			else{
-				mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(), 
-						newXmlHandler.getRequestTime());
-				refreshStopList();
+				Log.w(TAG, "showStop activity is null");
 			}
 		}
 	}
 
-	public class UnlockReciever extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			Log.i(UnlockReciever.class.getSimpleName(),
-					"received broadcast");
-			if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
-				showError("Unlock");
-				refreshArrivalData();
-			}
-		}
-
-	}
 
 	private Runnable mCountDownTask = new Runnable() {
 		public void run() {
