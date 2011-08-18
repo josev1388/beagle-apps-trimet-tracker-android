@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,7 +40,7 @@ public class showStop extends Activity {
 	private boolean mIsFavorite;
 
 	private Handler mTimersHandler = new Handler();
-	private DownloadArrivalData mDownloadTask = null;
+	private DownloadArrivalDataTask mDownloadTask = null;
 	private ProgressDialog mDialog;
 
 
@@ -68,7 +70,7 @@ public class showStop extends Activity {
 		arrivalAdapter = new ArrivalAdapter(this, mArrivals);
 		vArrivalsListView.setAdapter(arrivalAdapter);
 
-		mDownloadTask = (DownloadArrivalData)getLastNonConfigurationInstance();
+		mDownloadTask = (DownloadArrivalDataTask)getLastNonConfigurationInstance();
 		setupDialog();
 
 		if (mDownloadTask != null){
@@ -187,7 +189,7 @@ public class showStop extends Activity {
 
 		if (Connectivity.checkForInternetConnection(getApplicationContext()))
 		{
-			mDownloadTask = new DownloadArrivalData(this);
+			mDownloadTask = new DownloadArrivalDataTask(this);
 			mDownloadTask.execute(urlString);
 		}
 		else{
@@ -247,13 +249,24 @@ public class showStop extends Activity {
 	}
 
 	private void setupDialog(){
+		mDialog = null;
 		mDialog = new ProgressDialog(this);
 		mDialog.setMessage(getString(R.string.dialogGettingArrivals));
 		mDialog.setIndeterminate(true);
-		mDialog.setCancelable(false);
+		mDialog.setCancelable(true);
+		
+		OnCancelListener onCancelListener = new OnCancelListener() {
+			
+			public void onCancel(DialogInterface dialog) {
+				showStop.this.mDownloadTask.cancel(true);
+			}
+		};
+		
+		mDialog.setOnCancelListener(onCancelListener);
 	}
 
 	private void showDialog(){
+		setupDialog();
 		mDialog.show();
 	}
 
@@ -293,12 +306,12 @@ public class showStop extends Activity {
 		Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
 	}
 
-	private static class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
+	private static class DownloadArrivalDataTask extends AsyncTask<String, Void, XMLHandler> {
 		private showStop activity = null;
 		private boolean isDone = false;
 		private final String TAG = "DownloadArrivalData asyncTask";
 
-		DownloadArrivalData(showStop activity) {
+		DownloadArrivalDataTask(showStop activity) {
 			attach(activity);
 		}
 
@@ -356,6 +369,11 @@ public class showStop extends Activity {
 				Log.w(TAG, "showStop activity is null");
 			}
 		}
+		
+		@Override
+	    protected void onCancelled() {
+			isDone = true;
+	    }
 	}
 
 
