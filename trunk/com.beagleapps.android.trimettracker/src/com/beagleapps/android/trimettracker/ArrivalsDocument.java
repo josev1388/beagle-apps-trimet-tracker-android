@@ -14,16 +14,19 @@ public class ArrivalsDocument {
 	private static final String[] DaysOfWeek = 
 	{"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
 	
-	public static Document mArrivalsDoc;
+	public static Document mXMLDoc;
 	public static long mRequestTime;
 	
 	public ArrivalsDocument(Document arrivalsDoc, long requestTime) {
-		ArrivalsDocument.mArrivalsDoc = arrivalsDoc;
+		ArrivalsDocument.mXMLDoc = arrivalsDoc;
 		mRequestTime = requestTime;
 	}
 	
+	public ArrivalsDocument() {
+	}
+
 	public int getStopID(){
-		NodeList nodeList = mArrivalsDoc.getElementsByTagName("location");
+		NodeList nodeList = mXMLDoc.getElementsByTagName("location");
         
 		Node locationNode = nodeList.item(0);
 		String stopString = locationNode.getAttributes().getNamedItem("locid").getNodeValue();
@@ -31,18 +34,18 @@ public class ArrivalsDocument {
 	}
 	
 	public NodeList getArrivalNodes(){
-		return mArrivalsDoc.getElementsByTagName("arrival");    
+		return mXMLDoc.getElementsByTagName("arrival");    
 	}
 	
 	public String getStopDescription(){
-		NodeList nodeList = mArrivalsDoc.getElementsByTagName("location");
+		NodeList nodeList = mXMLDoc.getElementsByTagName("location");
 	        
 		Node locationNode = nodeList.item(0);
         return locationNode.getAttributes().getNamedItem("desc").getNodeValue();
 	}
 	
 	public String getDirection(){
-		NodeList nodeList = mArrivalsDoc.getElementsByTagName("location");
+		NodeList nodeList = mXMLDoc.getElementsByTagName("location");
         
 		Node locationNode = nodeList.item(0);
         return locationNode.getAttributes().getNamedItem("dir").getNodeValue();
@@ -73,7 +76,7 @@ public class ArrivalsDocument {
 	
 	// Returns the time of the request in milliseconds since epoch
 	public String getRequestTime(){
-        Node resultSet = mArrivalsDoc.getElementsByTagName("resultSet").item(0);
+        Node resultSet = mXMLDoc.getElementsByTagName("resultSet").item(0);
 		String requestTime = null;
 		
 		if(resultSet != null){

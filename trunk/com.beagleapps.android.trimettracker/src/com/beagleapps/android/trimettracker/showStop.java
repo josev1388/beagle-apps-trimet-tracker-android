@@ -38,7 +38,7 @@ public class showStop extends Activity {
 	private boolean mIsFavorite;
 
 	private Handler mTimersHandler = new Handler();
-	private DownloadArrivalData downloadTask = null;
+	private DownloadArrivalData mDownloadTask = null;
 	private ProgressDialog mDialog;
 
 
@@ -57,8 +57,7 @@ public class showStop extends Activity {
 		vDirection= (TextView)findViewById(R.id.SS_StopID);
 
 		mArrivals = new ArrayList<Arrival>();
-		mArrivalsDoc = new ArrivalsDocument(ArrivalsDocument.mArrivalsDoc, 
-				ArrivalsDocument.mRequestTime);
+		mArrivalsDoc = new ArrivalsDocument();
 
 		mStopID = mArrivalsDoc.getStopID();
 		vDirection.setText(mArrivalsDoc.getDirection());
@@ -69,12 +68,12 @@ public class showStop extends Activity {
 		arrivalAdapter = new ArrivalAdapter(this, mArrivals);
 		vArrivalsListView.setAdapter(arrivalAdapter);
 
-		downloadTask = (DownloadArrivalData)getLastNonConfigurationInstance();
+		mDownloadTask = (DownloadArrivalData)getLastNonConfigurationInstance();
 		setupDialog();
-		
-		if (downloadTask != null){
-			downloadTask.attach(this);
-			if (downloadTask.isDone()){
+
+		if (mDownloadTask != null){
+			mDownloadTask.attach(this);
+			if (mDownloadTask.isDone()){
 				dismissDialog();
 			}
 			else{
@@ -92,6 +91,7 @@ public class showStop extends Activity {
 	}
 
 	private boolean isDataOutOfDate() {
+		
 		return (mArrivalsDoc.getAge() >= MAX_AGE);
 	}
 
@@ -99,6 +99,15 @@ public class showStop extends Activity {
 	protected void onPause(){
 		super.onPause();
 		stopTimers();
+	}
+	
+	@Override 
+	protected void onDestroy(){
+		
+		if (mDownloadTask != null){
+			mDownloadTask.detach();
+		}
+		super.onDestroy();
 	}
 
 	public void onWindowFocusChanged (boolean hasFocus){
@@ -178,8 +187,8 @@ public class showStop extends Activity {
 
 		if (Connectivity.checkForInternetConnection(getApplicationContext()))
 		{
-			downloadTask = new DownloadArrivalData(this);
-			downloadTask.execute(urlString);
+			mDownloadTask = new DownloadArrivalData(this);
+			mDownloadTask.execute(urlString);
 		}
 		else{
 			Connectivity.showErrorToast(getApplicationContext());
@@ -209,13 +218,11 @@ public class showStop extends Activity {
 	private void ShowAddedToast() {
 		Toast.makeText(getApplicationContext(), getString(R.string.stopFavorited),
 				Toast.LENGTH_SHORT).show();
-
 	}
 
 	private void ShowRemovedToast() {
 		Toast.makeText(getApplicationContext(), getString(R.string.stopRemoved),
 				Toast.LENGTH_SHORT).show();
-
 	}
 
 	private Favorite constructFavorite() {
@@ -232,9 +239,11 @@ public class showStop extends Activity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		downloadTask.detach();
+		if (mDownloadTask != null){
+			mDownloadTask.detach();
+		}
 
-		return(downloadTask);
+		return(mDownloadTask);
 	}
 
 	private void setupDialog(){
@@ -320,7 +329,7 @@ public class showStop extends Activity {
 
 		protected void onPreExecute() {
 			isDone = false;
-			
+
 			if (activity != null){
 				activity.showDialog();
 			}
@@ -331,14 +340,15 @@ public class showStop extends Activity {
 
 		protected void onPostExecute(XMLHandler newXmlHandler) {
 			isDone = true;
-			
+
 			if (activity != null){
 				activity.dismissDialog();
 				if (newXmlHandler.hasError())
 					activity.showError(newXmlHandler.getError());
 				else{
-					activity.mArrivalsDoc = new ArrivalsDocument(newXmlHandler.getXmlDoc(), 
-							newXmlHandler.getRequestTime());
+					ArrivalsDocument.mXMLDoc = newXmlHandler.getXmlDoc();
+					ArrivalsDocument.mRequestTime = newXmlHandler.getRequestTime();
+					
 					activity.refreshStopList();
 				}
 			}
