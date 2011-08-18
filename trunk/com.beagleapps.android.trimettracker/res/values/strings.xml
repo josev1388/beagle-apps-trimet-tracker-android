@@ -42,4 +42,5 @@
     <item>Vintage Trolley</item>
     </string-array>
     <string name="note">Note:</string>
+    <string name="Cancel">Cancel</string>
 </resources>

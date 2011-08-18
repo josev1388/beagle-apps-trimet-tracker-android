@@ -5,7 +5,9 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnCancelListener;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,7 +39,7 @@ public class homepage extends Activity {
 	private static ArrivalsDocument mArrivalsDoc;
 	ArrayAdapter<String> listViewAdapter;
 	
-	private DownloadArrivalData mDownloadTask = null;
+	private DownloadArrivalDataTask mDownloadTask = null;
 	private ProgressDialog mDialog;
 
 
@@ -73,14 +75,13 @@ public class homepage extends Activity {
 		});
 
 		favoriteStopsListView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
 			public void onItemClick(AdapterView<?> a, View v, int position, long id) {
 				onStopClick(mFavorites.get(position).getStopID());
 			}
 		});
 		
 		setupDialog();
-		mDownloadTask = (DownloadArrivalData)getLastNonConfigurationInstance();
+		mDownloadTask = (DownloadArrivalDataTask)getLastNonConfigurationInstance();
 		
 		if (mDownloadTask != null){
 			mDownloadTask.attach(this);
@@ -119,7 +120,7 @@ public class homepage extends Activity {
 
 		if (Connectivity.checkForInternetConnection(getApplicationContext()))
 		{
-			mDownloadTask = new DownloadArrivalData(this);
+			mDownloadTask = new DownloadArrivalDataTask(this);
 			mDownloadTask.execute(urlString);
 		}
 		else{
@@ -182,13 +183,24 @@ public class homepage extends Activity {
 	}
 	
 	private void setupDialog(){
+		mDialog = null;
 		mDialog = new ProgressDialog(this);
 		mDialog.setMessage(getString(R.string.dialogGettingArrivals));
 		mDialog.setIndeterminate(true);
-		mDialog.setCancelable(false);
+		mDialog.setCancelable(true);
+		
+		OnCancelListener onCancelListener = new OnCancelListener() {
+			
+			public void onCancel(DialogInterface dialog) {
+				homepage.this.mDownloadTask.cancel(true);
+			}
+		};
+		
+		mDialog.setOnCancelListener(onCancelListener);
 	}
 
 	private void showDialog(){
+		setupDialog();
 		mDialog.show();
 	}
 
@@ -196,12 +208,12 @@ public class homepage extends Activity {
 		mDialog.dismiss();
 	}
 
-	private static class DownloadArrivalData extends AsyncTask<String, Void, XMLHandler> {
+	private static class DownloadArrivalDataTask extends AsyncTask<String, Void, XMLHandler> {
 		private homepage activity = null;
 		private boolean isDone = false;
 		private final String TAG = "DownloadArrivalData asyncTask";
 
-		DownloadArrivalData(homepage activity) {
+		DownloadArrivalDataTask(homepage activity) {
 			attach(activity);
 		}
 
@@ -259,5 +271,10 @@ public class homepage extends Activity {
 				Log.w(TAG, "showStop activity is null");
 			}
 		}
+		
+		@Override
+	    protected void onCancelled() {
+	        isDone = true;
+	    }
 	}
 }
