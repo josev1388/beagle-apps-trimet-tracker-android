@@ -34,7 +34,7 @@ public class ArrivalsDocument {
 	}
 	
 	public NodeList getArrivalNodes(){
-		return mXMLDoc.getElementsByTagName("arrival");    
+		return mXMLDoc.getElementsByTagName("arrival");
 	}
 	
 	public String getStopDescription(){

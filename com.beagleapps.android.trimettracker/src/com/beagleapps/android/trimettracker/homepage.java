@@ -12,6 +12,9 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -39,8 +42,10 @@ public class homepage extends Activity {
 	private static ArrivalsDocument mArrivalsDoc;
 	ArrayAdapter<String> listViewAdapter;
 	
-	private DownloadArrivalDataTask mDownloadTask = null;
-	private ProgressDialog mDialog;
+	private DownloadArrivalDataTask mDownloadArrivalTask = null;
+	private DownloadRoutesDataTask mDownloadRoutesTask = null;
+	private ProgressDialog mArrivalsDialog;
+	private ProgressDialog mRoutesDialog;
 
 
 	@Override
@@ -63,6 +68,13 @@ public class homepage extends Activity {
 		favoriteAdapter = new FavoriteAdapter(this, mFavorites);
 		favoriteStopsListView.setAdapter(favoriteAdapter);
 
+		setupListeners();
+		
+		handleRotation();
+
+	}
+
+	private void setupListeners() {
 		goButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (stopIDTextBox.getText().length() > 0){
@@ -79,22 +91,83 @@ public class homepage extends Activity {
 				onStopClick(mFavorites.get(position).getStopID());
 			}
 		});
+	}
+
+	// Resumes the dialog if an async task is still in progress after rotation
+	private void handleRotation() {
+		HomepageRotationInstance instance = (HomepageRotationInstance)getLastNonConfigurationInstance();
 		
-		setupDialog();
-		mDownloadTask = (DownloadArrivalDataTask)getLastNonConfigurationInstance();
+		if (instance != null){
+			mDownloadArrivalTask = instance.getDownloadArrivalTask();
+			mDownloadRoutesTask = instance.getDownloadRoutesTask();
+		}
 		
-		if (mDownloadTask != null){
-			mDownloadTask.attach(this);
-			if (mDownloadTask.isDone()){
-				dismissDialog();
+		if (mDownloadArrivalTask != null){
+			mDownloadArrivalTask.attach(this);
+			if (mDownloadArrivalTask.isDone()){
+				dismissArrivalsDialog();
 			}
 			else{
-				showDialog();
+				showArrivalsDialog();
 			}
 		}
-
+		else if (mDownloadRoutesTask != null){
+			mDownloadRoutesTask.attach(this);
+			if (mDownloadRoutesTask.isDone()){
+				dismissRoutesDialog();
+			}
+			else{
+				showRoutesDialog();
+			}
+		}
 	}
 	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.homepage_menu, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return super.onPrepareOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.menu_findStop:
+			onFindStopClick();
+			return true;
+		case R.id.menu_nearbyStops:
+			onFindNearybyClick();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	private void onFindNearybyClick() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void onFindStopClick() {
+		String urlString = new String(getString(R.string.baseRoutesURL));
+		
+		if (Connectivity.checkForInternetConnection(getApplicationContext()))
+		{
+			mDownloadRoutesTask = new DownloadRoutesDataTask(this);
+			mDownloadRoutesTask.execute(urlString);
+		}
+		else{
+			Connectivity.showErrorToast(getApplicationContext());
+		}
+		
+	}
+
 	@Override 
 	protected void onPause(){
 		super.onPause();
@@ -120,8 +193,8 @@ public class homepage extends Activity {
 
 		if (Connectivity.checkForInternetConnection(getApplicationContext()))
 		{
-			mDownloadTask = new DownloadArrivalDataTask(this);
-			mDownloadTask.execute(urlString);
+			mDownloadArrivalTask = new DownloadArrivalDataTask(this);
+			mDownloadArrivalTask.execute(urlString);
 		}
 		else{
 			Connectivity.showErrorToast(getApplicationContext());
@@ -129,10 +202,16 @@ public class homepage extends Activity {
 
 	}
 
-	protected void showStop() {
+	protected void launchShowStop() {
 		Intent showStopIntent = new Intent();
 		showStopIntent.setClass(getApplicationContext(), showStop.class);
 		startActivity(showStopIntent);
+	}
+	
+	public void launchChooseRoute() {
+		Intent chooseRouteIntent = new Intent();
+		chooseRouteIntent.setClass(getApplicationContext(), chooseRoute.class);
+		startActivity(chooseRouteIntent);
 	}
 
 
@@ -175,40 +254,140 @@ public class homepage extends Activity {
 	
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		if (mDownloadTask != null){
-			mDownloadTask.detach();
+		if (mDownloadArrivalTask != null){
+			mDownloadArrivalTask.detach();
+		}
+		if (mDownloadRoutesTask != null){
+			mDownloadRoutesTask.detach();
 		}
 		
-		return(mDownloadTask);
+		return(new HomepageRotationInstance(mDownloadArrivalTask, mDownloadRoutesTask));
 	}
 	
-	private void setupDialog(){
-		mDialog = null;
-		mDialog = new ProgressDialog(this);
-		mDialog.setMessage(getString(R.string.dialogGettingArrivals));
-		mDialog.setIndeterminate(true);
-		mDialog.setCancelable(true);
+	private void setupArrivalsDialog(){
+		mArrivalsDialog = null;
+		mArrivalsDialog = new ProgressDialog(this);
+		mArrivalsDialog.setMessage(getString(R.string.dialogGettingArrivals));
+		mArrivalsDialog.setIndeterminate(true);
+		mArrivalsDialog.setCancelable(true);
 		
 		OnCancelListener onCancelListener = new OnCancelListener() {
 			
 			public void onCancel(DialogInterface dialog) {
-				homepage.this.mDownloadTask.cancel(true);
+				homepage.this.mDownloadArrivalTask.cancel(true);
 			}
 		};
 		
-		mDialog.setOnCancelListener(onCancelListener);
+		mArrivalsDialog.setOnCancelListener(onCancelListener);
+	}
+	
+	private void setupRoutesDialog(){
+		mRoutesDialog = null;
+		mRoutesDialog = new ProgressDialog(this);
+		mRoutesDialog.setMessage(getString(R.string.dialogGettingRoutes));
+		mRoutesDialog.setIndeterminate(true);
+		mRoutesDialog.setCancelable(true);
+		
+		OnCancelListener onCancelListener = new OnCancelListener() {
+			
+			public void onCancel(DialogInterface dialog) {
+				homepage.this.mDownloadRoutesTask.cancel(true);
+			}
+		};
+		
+		mRoutesDialog.setOnCancelListener(onCancelListener);
 	}
 
-	private void showDialog(){
-		setupDialog();
-		mDialog.show();
+	void showArrivalsDialog(){
+		setupArrivalsDialog();
+		mArrivalsDialog.show();
 	}
 
-	private void dismissDialog(){
-		mDialog.dismiss();
+	void dismissArrivalsDialog(){
+		if (mArrivalsDialog != null){
+			mArrivalsDialog.dismiss();
+		}
+	}
+	
+	void showRoutesDialog(){
+		setupRoutesDialog();
+		mRoutesDialog.show();
 	}
 
-	private static class DownloadArrivalDataTask extends AsyncTask<String, Void, XMLHandler> {
+	void dismissRoutesDialog(){
+		if (mRoutesDialog != null){
+			mRoutesDialog.dismiss();
+		}
+	}
+	
+	class DownloadRoutesDataTask extends AsyncTask<String, Void, XMLHandler> {
+		private homepage activity = null;
+		private boolean isDone = false;
+		private final String TAG = "DownloadRoutesData asyncTask";
+
+		DownloadRoutesDataTask(homepage activity) {
+			attach(activity);
+		}
+
+		public boolean isDone() {
+			return isDone;
+		}
+
+		public void attach(homepage activity) {
+			this.activity = activity;
+		}
+
+		public void detach() {
+			activity = null;
+		}
+
+		protected XMLHandler doInBackground(String... urls) {
+			XMLHandler newXmlHandler = null;
+			try {
+				newXmlHandler = new XMLHandler(urls[0]);
+				newXmlHandler.refreshXmlData();
+			} catch (MalformedURLException e) {
+				Log.e(TAG, e.getMessage());
+			}
+			return newXmlHandler;
+		}
+
+		protected void onPreExecute() {
+			isDone = false;
+			
+			if (activity != null){
+				activity.showRoutesDialog();
+			}
+			else{
+				Log.w(TAG, "homepage activity is null");
+			}
+		}
+
+		protected void onPostExecute(XMLHandler newXmlHandler) {
+			isDone = true;
+			
+			if (activity != null){
+				activity.dismissRoutesDialog();
+				if (newXmlHandler.hasError())
+					activity.showError(newXmlHandler.getError());
+				else{
+					RoutesDocument.mRouteXMLDoc = newXmlHandler.getXmlDoc();
+					
+					activity.launchChooseRoute();
+				}
+			}
+			else{
+				Log.w(TAG, "homepage activity is null");
+			}
+		}
+		
+		@Override
+	    protected void onCancelled() {
+	        isDone = true;
+	    }
+	}
+	
+	class DownloadArrivalDataTask extends AsyncTask<String, Void, XMLHandler> {
 		private homepage activity = null;
 		private boolean isDone = false;
 		private final String TAG = "DownloadArrivalData asyncTask";
@@ -221,12 +400,12 @@ public class homepage extends Activity {
 			return isDone;
 		}
 
-		private void attach(homepage activity) {
+		public void attach(homepage activity) {
 			this.activity = activity;
 
 		}
 
-		private void detach() {
+		public void detach() {
 			activity = null;
 
 		}
@@ -246,7 +425,7 @@ public class homepage extends Activity {
 			isDone = false;
 			
 			if (activity != null){
-				activity.showDialog();
+				activity.showArrivalsDialog();
 			}
 			else{
 				Log.w(TAG, "showStop activity is null");
@@ -257,14 +436,14 @@ public class homepage extends Activity {
 			isDone = true;
 			
 			if (activity != null){
-				activity.dismissDialog();
+				activity.dismissArrivalsDialog();
 				if (newXmlHandler.hasError())
 					activity.showError(newXmlHandler.getError());
 				else{
 					ArrivalsDocument.mXMLDoc = newXmlHandler.getXmlDoc();
 					ArrivalsDocument.mRequestTime = newXmlHandler.getRequestTime();
 					
-					activity.showStop();
+					activity.launchShowStop();
 				}
 			}
 			else{

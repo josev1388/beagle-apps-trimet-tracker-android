@@ -2,6 +2,7 @@ package com.beagleapps.android.trimettracker;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -42,6 +43,9 @@ public class showStop extends Activity {
 	private Handler mTimersHandler = new Handler();
 	private DownloadArrivalDataTask mDownloadTask = null;
 	private ProgressDialog mDialog;
+	
+	// Set when dialog is canceled
+	private long mRefreshDelayTime;
 
 
 	@Override
@@ -49,7 +53,6 @@ public class showStop extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.showstop);
-
 
 		mDbHelper = new DBAdapter(this);
 		mDbHelper.open();
@@ -71,7 +74,6 @@ public class showStop extends Activity {
 		vArrivalsListView.setAdapter(arrivalAdapter);
 
 		mDownloadTask = (DownloadArrivalDataTask)getLastNonConfigurationInstance();
-		setupDialog();
 
 		if (mDownloadTask != null){
 			mDownloadTask.attach(this);
@@ -84,7 +86,7 @@ public class showStop extends Activity {
 		}
 	}
 
-	// Reciever tells the app to refresh on unlock,
+	// Receiver tells the app to refresh on unlock,
 	// If the window has focus
 	@Override 
 	protected void onResume(){
@@ -93,8 +95,15 @@ public class showStop extends Activity {
 	}
 
 	private boolean isDataOutOfDate() {
-		
-		return (mArrivalsDoc.getAge() >= MAX_AGE);
+		// if use cancels a dialog that's refreshing the arrival times, it will immediately refresh again
+		// 		since the focus changes again and it sees that the arrivals are out of date. The refresh delay
+		//		compensates for this by giving a small amount of padding
+		return (mArrivalsDoc.getAge() >= MAX_AGE && getRefreshDelayAge() >= MAX_AGE);
+	}
+
+	
+	private int getRefreshDelayAge() {
+		return (int) ((new Date().getTime() - mRefreshDelayTime)/1000);
 	}
 
 	@Override 
@@ -271,7 +280,9 @@ public class showStop extends Activity {
 	}
 
 	private void dismissDialog(){
-		mDialog.dismiss();
+		if (mDialog != null){
+			mDialog.dismiss();
+		}
 	}
 
 	private void getArrivals()
@@ -373,6 +384,7 @@ public class showStop extends Activity {
 		@Override
 	    protected void onCancelled() {
 			isDone = true;
+			activity.mRefreshDelayTime = new Date().getTime();
 	    }
 	}
 
