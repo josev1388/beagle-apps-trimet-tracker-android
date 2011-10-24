@@ -7,7 +7,7 @@ import java.util.Iterator;
 public final class RoutesUtilities {
 	private static final String[] RoutesToExclude = {
 		"999",
-		"93",
+		"193",
 		"98",
 		"150"};
 		
@@ -71,5 +71,9 @@ public final class RoutesUtilities {
             }
         }
         return buffer.toString();
+    }
+	
+	public static boolean isExcludedRoute (String routeNumber) {
+        return (Arrays.asList(RoutesToExclude).contains(routeNumber));
     }
 }

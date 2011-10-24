@@ -127,7 +127,9 @@ public class chooseRoute extends Activity {
 				String desc = mRoutesDocument.getRouteDescription(index);
 				String number = mRoutesDocument.getRouteNumber(index);
 				
-				mRouteList.add(new Route(desc, number));
+				if (!RoutesUtilities.isExcludedRoute(number)){
+					mRouteList.add(new Route(desc, number));
+				}
 			}
 			mAdapterList = new ArrayList<Route>(mRouteList);
 			mRouteListAdapter = new RouteAdapter(this, mAdapterList);
