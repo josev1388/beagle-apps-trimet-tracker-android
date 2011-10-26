@@ -43,11 +43,6 @@
 
 		<ImageView style="@style/TitleBarSeparatorDark" />
 		<ImageView style="@style/TitleBarSeparatorLight" />
-		<Button android:layout_weight="2" android:layout_width="wrap_content"
-			android:id="@+id/goButton" android:text="@string/CR_Filter"
-			android:layout_height="wrap_content" android:layout_gravity="bottom"></Button>
-		<ImageView style="@style/TitleBarSeparatorDark" />
-		<ImageView style="@style/TitleBarSeparatorLight" />
 	</LinearLayout>
     
 </LinearLayout>

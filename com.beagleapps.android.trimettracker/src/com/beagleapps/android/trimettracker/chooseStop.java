@@ -3,8 +3,6 @@ package com.beagleapps.android.trimettracker;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-import com.beagleapps.android.trimettracker.homepage.DownloadArrivalDataTask;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;

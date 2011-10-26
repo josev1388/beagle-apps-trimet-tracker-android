@@ -20,7 +20,7 @@
 			android:paddingLeft="10dp" android:id="@+id/CD_Title"
 			android:paddingRight="10dp" android:layout_height="wrap_content"
 			android:paddingTop="5dp" android:layout_gravity="center"
-			android:layout_width="wrap_content" android:paddingBottom="4dp"></TextView>
+			android:layout_width="wrap_content"></TextView>
 		<TextView android:maxLines="1" android:text="Route Name"
 			android:textSize="15sp" android:singleLine="true"
 			android:paddingLeft="10dp" android:id="@+id/CD_RouteName"
