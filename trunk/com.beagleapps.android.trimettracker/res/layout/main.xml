@@ -31,18 +31,17 @@
 		android:background="@drawable/top_bar" android:layout_height="52dp">
 		<EditText android:layout_width="wrap_content" android:hint="@string/homepageTextTip"
 			android:layout_gravity="bottom" android:cursorVisible="true"
-			android:inputType="number"
-			android:layout_height="wrap_content" android:layout_marginRight="1dp"
-			android:id="@+id/stopIDTextBox" android:layout_weight="2">
+			android:inputType="number" android:layout_height="wrap_content"
+			android:layout_marginRight="1dp" android:id="@+id/stopIDTextBox"
+			android:layout_weight="2">
 			<requestFocus></requestFocus>
 		</EditText>
 
 		<ImageView style="@style/TitleBarSeparatorDark" />
 		<ImageView style="@style/TitleBarSeparatorLight" />
 		<Button android:layout_weight="2" android:layout_width="wrap_content"
-			android:id="@+id/goButton" android:text="@string/homepageGo"
-			android:layout_height="wrap_content" android:layout_gravity="bottom"></Button>
-		<ImageView style="@style/TitleBarSeparatorDark" />
-		<ImageView style="@style/TitleBarSeparatorLight" />
+			android:id="@+id/goButton" android:text="@string/homepageGo" style="@style/GradiantButton"
+			android:layout_gravity="bottom" android:layout_height="match_parent"></Button>
+
 	</LinearLayout>
 </LinearLayout>

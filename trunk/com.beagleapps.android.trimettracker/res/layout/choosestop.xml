@@ -18,13 +18,13 @@
 			android:paddingLeft="10dp" android:id="@+id/CS_title"
 			android:paddingRight="10dp" android:layout_height="wrap_content"
 			android:paddingTop="5dp" android:layout_gravity="center"
-			android:layout_width="wrap_content" android:paddingBottom="4dp"></TextView>
+			android:layout_width="wrap_content"></TextView>
 		<TextView android:maxLines="1" android:text="Route"
 			android:textSize="15sp" android:singleLine="true"
 			android:paddingLeft="10dp" android:id="@+id/CS_route_description"
 			android:paddingRight="10dp" android:layout_height="wrap_content"
 			android:layout_gravity="center" android:layout_width="wrap_content"
-			android:paddingBottom="5dp"></TextView>
+			></TextView>
 		<TextView android:maxLines="1" android:text="Direction"
 			android:textSize="15sp" android:singleLine="true"
 			android:paddingLeft="10dp" android:id="@+id/CS_direction_description"
@@ -35,7 +35,7 @@
 			android:layout_width="fill_parent" android:layout_height="1px"
 			android:id="@+id/divider_"></View>
 	</LinearLayout>
-	
+
 	<ListView android:layout_width="match_parent"
 		android:layout_height="match_parent" android:id="@+id/CS_ListView">
 	</ListView>
