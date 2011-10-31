@@ -9,6 +9,8 @@ public class RoutesDocument {
 	public static Document mRouteXMLDoc;
 	public static Document mStopsXMLDoc;
 	
+	private NodeList mDirectionNodes = null;
+	
 	// Used when going from chooseDirection to chooseStop
 	private static int chosenDirection;
 	
@@ -25,7 +27,11 @@ public class RoutesDocument {
 	}
 	
 	public NodeList getDirectionNodes(){
-		return mStopsXMLDoc.getElementsByTagName("dir");
+		if (mDirectionNodes == null){
+			mDirectionNodes = mStopsXMLDoc.getElementsByTagName("dir");
+		}
+		
+		return mDirectionNodes;
 	}
 	
 	public NodeList getStopNodes(int dir){
