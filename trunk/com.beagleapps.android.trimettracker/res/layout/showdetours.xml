@@ -15,32 +15,15 @@
 			android:id="@+id/divider_"></View>
 		<TextView android:maxLines="1" android:text="TextView"
 			android:textSize="20sp" android:singleLine="true"
-			android:paddingLeft="10dp" android:id="@+id/SS_StopTitle"
+			android:paddingLeft="10dp" android:id="@+id/SD_Title"
 			android:paddingRight="10dp" android:layout_height="wrap_content"
 			android:paddingTop="5dp" android:layout_gravity="center"
-			android:layout_width="wrap_content" android:paddingBottom="4dp"></TextView>
-		<TextView android:maxLines="1" android:text="TextView"
-			android:textSize="15sp" android:singleLine="true"
-			android:paddingLeft="10dp" android:id="@+id/SS_StopID"
-			android:paddingRight="10dp" android:layout_height="wrap_content"
-			android:layout_gravity="center" android:layout_width="wrap_content"
-			android:paddingBottom="5dp"></TextView>
+			android:layout_width="wrap_content" android:paddingBottom="8dp"></TextView>
 		<View android:background="@drawable/divider_black"
 			android:layout_width="fill_parent" android:layout_height="1px"
 			android:id="@+id/divider_"></View>
 	</LinearLayout>
-	<ListView android:layout_height="match_parent" android:id="@+id/SS_ArrivalsListView" android:layout_width="wrap_content" android:layout_weight="1">
+	<ListView android:layout_height="match_parent" android:id="@+id/SD_DetoursListView"
+		android:layout_width="wrap_content" android:layout_weight="1">
 	</ListView>
-	
-	<View android:layout_width="fill_parent" android:layout_height="1px"
-		android:background="@drawable/divider_black" android:id="@+id/SS_BottomDivider" android:visibility="gone"></View>
-	
-	<LinearLayout android:layout_width="match_parent"
-		android:id="@+id/SS_BottomBar" android:layout_gravity="bottom"
-		android:background="@drawable/top_bar" android:layout_height="52dp" android:visibility="gone">
-		<Button android:id="@+id/SS_DetourButton" android:text="@string/DetoursActiveButton" style="@style/RedButton"
-			android:layout_gravity="bottom" android:layout_height="match_parent" android:layout_width="match_parent">
-		</Button>
-
-	</LinearLayout>
 </LinearLayout>

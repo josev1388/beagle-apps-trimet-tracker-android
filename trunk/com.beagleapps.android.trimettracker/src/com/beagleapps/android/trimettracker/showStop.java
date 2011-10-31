@@ -6,22 +6,21 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,8 +45,13 @@ public class showStop extends Activity {
 	private boolean mIsFavorite;
 
 	private Handler mTimersHandler = new Handler();
-	private DownloadArrivalDataTask mDownloadTask = null;
-	private ProgressDialog mDialog;
+	private DownloadArrivalDataTask mDownloadArrivalTask = null;
+	private DownloadDetourDataTask mDownloadDetourTask = null;
+	private ProgressDialog mArrivalsDialog;
+	private ProgressDialog mDetoursDialog;
+	private Button mDetourButton;
+	private View mBottomDivider;
+	private LinearLayout mBottomBar;
 	
 	// Set when dialog is canceled
 	private long mRefreshDelayTime;
@@ -65,6 +69,9 @@ public class showStop extends Activity {
 		vArrivalsListView = (ListView)findViewById(R.id.SS_ArrivalsListView);
 		vStopTitle = (TextView)findViewById(R.id.SS_StopTitle);
 		vDirection= (TextView)findViewById(R.id.SS_StopID);
+		mDetourButton = (Button)findViewById(R.id.SS_DetourButton);
+		mBottomBar = (LinearLayout)findViewById(R.id.SS_BottomBar);
+		mBottomDivider = (View)findViewById(R.id.SS_BottomDivider);
 
 		mArrivals = new ArrayList<Arrival>();
 		mArrivalsDoc = new ArrivalsDocument();
@@ -78,17 +85,89 @@ public class showStop extends Activity {
 		arrivalAdapter = new ArrivalAdapter(this, mArrivals);
 		vArrivalsListView.setAdapter(arrivalAdapter);
 
-		mDownloadTask = (DownloadArrivalDataTask)getLastNonConfigurationInstance();
+		handleRotation();
+		setupListeners();
+		
+		// Check for detours, display button
+		handleDetours();
+	}
 
-		if (mDownloadTask != null){
-			mDownloadTask.attach(this);
-			if (mDownloadTask.isDone()){
-				dismissDialog();
+	private void handleRotation() {
+		ShowStopRotationInstance instance = (ShowStopRotationInstance)getLastNonConfigurationInstance();
+		
+		if (instance != null){
+			mDownloadArrivalTask = instance.getDownloadArrivalTask();
+			mDownloadDetourTask = instance.getDownloadDetoursTask();
+		}
+		
+		if (mDownloadArrivalTask != null){
+			mDownloadArrivalTask.attach(this);
+			if (mDownloadArrivalTask.isDone()){
+				dismissArrivalsDialog();
 			}
 			else{
-				showDialog();
+				showArrivalsDialog();
 			}
 		}
+		else if (mDownloadDetourTask != null){
+			mDownloadDetourTask.attach(this);
+			if (mDownloadDetourTask.isDone()){
+				dismissDetoursDialog();
+			}
+			else{
+				showDetoursDialog();
+			}
+		}
+	}
+	
+	private void handleDetours() {
+		int length = mArrivals.size();
+		boolean hasDetour = false;
+	
+		for (int index = 0; index < length; index++) {
+			if (mArrivalsDoc.hasDetour(index)){
+				hasDetour = true;
+				break;
+			}
+		}
+		
+		if(hasDetour){
+			showDetourButton();
+		}
+	}
+
+	private void setupListeners() {
+		mDetourButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				onDetourClick();
+			}
+		});
+	}
+	
+	private void onDetourClick() {
+		String routeListString = RoutesUtilities.join(mArrivalsDoc.getRouteList(), ",");
+		String urlString = new String(getString(R.string.baseDetourUrl) + routeListString);
+
+
+		if (Connectivity.checkForInternetConnection(getApplicationContext()))
+		{
+			stopTimers();
+			mDownloadDetourTask = new DownloadDetourDataTask(this);
+			mDownloadDetourTask.execute(urlString);
+		}
+		else{
+			Connectivity.showErrorToast(getApplicationContext());
+		}
+	}
+	
+	private void hideDetourButton() {
+		mBottomBar.setVisibility(View.GONE);
+		mBottomDivider.setVisibility(View.GONE);
+	}
+	
+	private void showDetourButton() {
+		mBottomBar.setVisibility(View.VISIBLE);
+		mBottomDivider.setVisibility(View.VISIBLE);
 	}
 
 	// Receiver tells the app to refresh on unlock,
@@ -120,8 +199,8 @@ public class showStop extends Activity {
 	@Override 
 	protected void onDestroy(){
 		
-		if (mDownloadTask != null){
-			mDownloadTask.detach();
+		if (mDownloadArrivalTask != null){
+			mDownloadArrivalTask.detach();
 		}
 		super.onDestroy();
 	}
@@ -146,6 +225,10 @@ public class showStop extends Activity {
 	private void resetTimers() {
 		stopTimers();
 		startTimers();
+	}
+	
+	private void resetRefreshDelay() {
+		mRefreshDelayTime = new Date().getTime();
 	}
 
 	private boolean isStopFavorite() {
@@ -204,8 +287,8 @@ public class showStop extends Activity {
 
 		if (Connectivity.checkForInternetConnection(getApplicationContext()))
 		{
-			mDownloadTask = new DownloadArrivalDataTask(this);
-			mDownloadTask.execute(urlString);
+			mDownloadArrivalTask = new DownloadArrivalDataTask(this);
+			mDownloadArrivalTask.execute(urlString);
 		}
 		else{
 			Connectivity.showErrorToast(getApplicationContext());
@@ -256,45 +339,76 @@ public class showStop extends Activity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		if (mDownloadTask != null){
-			mDownloadTask.detach();
+		if (mDownloadArrivalTask != null){
+			mDownloadArrivalTask.detach();
 		}
-
-		return(mDownloadTask);
+		if (mDownloadDetourTask != null){
+			mDownloadDetourTask.detach();
+		}
+		
+		return(new ShowStopRotationInstance(mDownloadArrivalTask, mDownloadDetourTask));
 	}
 
-	private void setupDialog(){
-		mDialog = null;
-		mDialog = new ProgressDialog(this);
-		mDialog.setMessage(getString(R.string.dialogGettingArrivals));
-		mDialog.setIndeterminate(true);
-		mDialog.setCancelable(true);
+
+	private void showDetoursDialog(){
+		setupDetoursDialog();
+		mDetoursDialog.show();
+	}
+
+	private void dismissDetoursDialog(){
+		if (mDetoursDialog != null){
+			mDetoursDialog.dismiss();
+		}
+	}
+	
+	private void setupDetoursDialog(){
+		mDetoursDialog = null;
+		mDetoursDialog = new ProgressDialog(this);
+		mDetoursDialog.setMessage(getString(R.string.dialogGettingDetours));
+		mDetoursDialog.setIndeterminate(true);
+		mDetoursDialog.setCancelable(true);
 		
 		OnCancelListener onCancelListener = new OnCancelListener() {
 			
 			public void onCancel(DialogInterface dialog) {
-				showStop.this.mDownloadTask.cancel(true);
+				showStop.this.mDownloadDetourTask.cancel(true);
 			}
 		};
 		
-		mDialog.setOnCancelListener(onCancelListener);
+		mDetoursDialog.setOnCancelListener(onCancelListener);
+	}
+	
+	private void setupArrivalsDialog(){
+		mArrivalsDialog = null;
+		mArrivalsDialog = new ProgressDialog(this);
+		mArrivalsDialog.setMessage(getString(R.string.dialogGettingArrivals));
+		mArrivalsDialog.setIndeterminate(true);
+		mArrivalsDialog.setCancelable(true);
+		
+		OnCancelListener onCancelListener = new OnCancelListener() {
+			
+			public void onCancel(DialogInterface dialog) {
+				showStop.this.mDownloadArrivalTask.cancel(true);
+			}
+		};
+		
+		mArrivalsDialog.setOnCancelListener(onCancelListener);
 	}
 
-	private void showDialog(){
-		setupDialog();
-		mDialog.show();
+	private void showArrivalsDialog(){
+		setupArrivalsDialog();
+		mArrivalsDialog.show();
 	}
 
-	private void dismissDialog(){
-		if (mDialog != null){
-			mDialog.dismiss();
+	private void dismissArrivalsDialog(){
+		if (mArrivalsDialog != null){
+			mArrivalsDialog.dismiss();
 		}
 	}
 
 	private void getArrivals()
 	{
 		mArrivals.clear();
-
 
 		if(mArrivalsDoc != null){
 			int length = mArrivalsDoc.getNumArrivals();
@@ -318,12 +432,18 @@ public class showStop extends Activity {
 			}
 		}
 	}
+	
+	protected void launchShowDetour() {
+		Intent showStopIntent = new Intent();
+		showStopIntent.setClass(getApplicationContext(), showDetour.class);
+		startActivity(showStopIntent);
+	}
 
 	protected void showError(String error) {
 		Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
 	}
 
-	private static class DownloadArrivalDataTask extends AsyncTask<String, Void, XMLHandler> {
+	class DownloadArrivalDataTask extends AsyncTask<String, Void, XMLHandler> {
 		private showStop activity = null;
 		private boolean isDone = false;
 		private final String TAG = "DownloadArrivalData asyncTask";
@@ -361,7 +481,7 @@ public class showStop extends Activity {
 			isDone = false;
 
 			if (activity != null){
-				activity.showDialog();
+				activity.showArrivalsDialog();
 			}
 			else{
 				Log.w(TAG, "showStop activity is null");
@@ -372,7 +492,7 @@ public class showStop extends Activity {
 			isDone = true;
 
 			if (activity != null){
-				activity.dismissDialog();
+				activity.dismissArrivalsDialog();
 				if (newXmlHandler.hasError())
 					activity.showError(newXmlHandler.getError());
 				else{
@@ -390,7 +510,81 @@ public class showStop extends Activity {
 		@Override
 	    protected void onCancelled() {
 			isDone = true;
-			activity.mRefreshDelayTime = new Date().getTime();
+			activity.resetRefreshDelay();
+	    }
+
+		
+	}
+
+	
+	class DownloadDetourDataTask extends AsyncTask<String, Void, XMLHandler> {
+		private showStop activity = null;
+		private boolean isDone = false;
+		private final String TAG = "DownloadDetourData asyncTask";
+
+		DownloadDetourDataTask(showStop activity) {
+			attach(activity);
+		}
+
+		public boolean isDone() {
+			return isDone;
+		}
+
+		private void attach(showStop activity) {
+			this.activity = activity;
+
+		}
+
+		private void detach() {
+			activity = null;
+
+		}
+
+		protected XMLHandler doInBackground(String... urls) {
+			XMLHandler newXmlHandler = null;
+			try {
+				newXmlHandler = new XMLHandler(urls[0]);
+				newXmlHandler.refreshXmlData();
+			} catch (MalformedURLException e) {
+				Log.e(TAG, e.getMessage());
+			}
+			return newXmlHandler;
+		}
+
+		protected void onPreExecute() {
+			isDone = false;
+
+			if (activity != null){
+				activity.showDetoursDialog();
+			}
+			else{
+				Log.w(TAG, "showStop activity is null");
+			}
+		}
+
+		protected void onPostExecute(XMLHandler newXmlHandler) {
+			isDone = true;
+
+			if (activity != null){
+				activity.dismissDetoursDialog();
+				if (newXmlHandler.hasError())
+					activity.showError(newXmlHandler.getError());
+				else{
+					DetoursDocument.mXMLDoc = newXmlHandler.getXmlDoc();
+					
+					activity.launchShowDetour();
+				}
+			}
+			else{
+				Log.w(TAG, "showStop activity is null");
+			}
+		}
+		
+		@Override
+	    protected void onCancelled() {
+			isDone = true;
+			activity.startTimers();
+			activity.resetRefreshDelay();
 	    }
 	}
 
