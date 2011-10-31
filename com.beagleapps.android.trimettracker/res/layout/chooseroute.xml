@@ -40,9 +40,6 @@
 			android:id="@+id/CR_FilterTextBox" android:inputType="textFilter">
 			<requestFocus></requestFocus>
 		</EditText>
-
-		<ImageView style="@style/TitleBarSeparatorDark" />
-		<ImageView style="@style/TitleBarSeparatorLight" />
 	</LinearLayout>
     
 </LinearLayout>

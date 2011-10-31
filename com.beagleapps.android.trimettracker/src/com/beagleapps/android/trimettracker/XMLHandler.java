@@ -12,6 +12,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+// This class is just for downloading the xml data 
 public class XMLHandler {
 
 	private Document document;

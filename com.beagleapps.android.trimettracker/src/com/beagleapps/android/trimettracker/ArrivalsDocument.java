@@ -175,6 +175,14 @@ public class ArrivalsDocument {
         return status.compareTo("estimated") == 0;
         
 	}
+	
+	public boolean hasDetour(int index){
+		Node arrival = getArrivalNodes().item(index);
+		String status = arrival.getAttributes().getNamedItem("detour").getNodeValue();
+		
+        return status.compareTo("true") == 0;
+        
+	}
 
 	public int getNumArrivals() {
 		return getArrivalNodes().getLength();

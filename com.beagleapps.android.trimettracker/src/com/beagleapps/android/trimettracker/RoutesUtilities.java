@@ -38,6 +38,8 @@ public final class RoutesUtilities {
 	
 	// Changes the elements in the routelist from the route number to the color
 	// Also excludes certain route numbers
+	// Flag "replaceNumbers" defaults to true. False means it just returns a list of the route numbers
+	//		without parsing.
 	public static String parseRouteList(ArrayList<String> routeList) {
 		 ArrayList<String> newList = new ArrayList<String>();
 		 
@@ -60,6 +62,7 @@ public final class RoutesUtilities {
 		
 		return join(newList, ", ");
 	}
+	
 	
 	public static String join(ArrayList<String> list, String delimiter) {
         StringBuffer buffer = new StringBuffer();

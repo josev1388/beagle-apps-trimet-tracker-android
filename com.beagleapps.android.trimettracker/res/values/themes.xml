@@ -4,4 +4,7 @@
 	<style name="GradiantButton" parent="android:style/Theme.NoTitleBar">
         <item name="android:buttonStyle">@style/GradiantButton</item>
     </style>
+    <style name="RedButton" parent="android:style/Theme.NoTitleBar">
+        <item name="android:buttonStyle">@style/RedButton</item>
+    </style>
 </resources>
