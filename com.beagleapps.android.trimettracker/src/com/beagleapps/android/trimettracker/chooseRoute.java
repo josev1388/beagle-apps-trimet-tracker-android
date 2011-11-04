@@ -21,7 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class chooseRoute extends Activity {
+public class ChooseRoute extends Activity {
 	
 	private DownloadRoutesDataTask mDownloadRoutesDataTask = null;
 	private ProgressDialog mDialog;
@@ -153,7 +153,7 @@ public class chooseRoute extends Activity {
 		OnCancelListener onCancelListener = new OnCancelListener() {
 			
 			public void onCancel(DialogInterface dialog) {
-				chooseRoute.this.mDownloadRoutesDataTask.cancel(true);
+				ChooseRoute.this.mDownloadRoutesDataTask.cancel(true);
 			}
 		};
 		
@@ -162,7 +162,7 @@ public class chooseRoute extends Activity {
 	
 	public void launchChooseDirection() {
 		Intent intent = new Intent();
-		intent.setClass(getApplicationContext(), chooseDirection.class);
+		intent.setClass(getApplicationContext(), ChooseDirection.class);
 		startActivity(intent);
 	}
 
@@ -189,11 +189,11 @@ public class chooseRoute extends Activity {
 	}
 
 	private static class DownloadRoutesDataTask extends AsyncTask<String, Void, XMLHandler> {
-		private chooseRoute activity = null;
+		private ChooseRoute activity = null;
 		private boolean isDone = false;
 		private final String TAG = "DownloadArrivalData asyncTask";
 
-		DownloadRoutesDataTask(chooseRoute activity) {
+		DownloadRoutesDataTask(ChooseRoute activity) {
 			attach(activity);
 		}
 
@@ -201,7 +201,7 @@ public class chooseRoute extends Activity {
 			return isDone;
 		}
 
-		private void attach(chooseRoute activity) {
+		private void attach(ChooseRoute activity) {
 			this.activity = activity;
 
 		}

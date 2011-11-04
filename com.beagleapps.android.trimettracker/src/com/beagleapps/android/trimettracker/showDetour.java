@@ -8,7 +8,7 @@ import android.view.Window;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class showDetour extends Activity {
+public class ShowDetour extends Activity {
 	String TAG = "showDetour";
 
 	private ArrayList<Detour> mDetours = null;

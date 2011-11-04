@@ -25,13 +25,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class showStop extends Activity {
+public class ShowStop extends Activity {
 
 	private final int COUNTDOWN_DELAY = 5000;
 	private final int REFRESH_DELAY = 30000;
 	private final int MAX_AGE = 10;
 
-	String TAG = "showStop";
+	String TAG = "ShowStop";
 	private int mStopID;
 
 	private ArrayList<Arrival> mArrivals = null;
@@ -164,6 +164,7 @@ public class showStop extends Activity {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void hideDetourButton() {
 		vBottomBar.setVisibility(View.GONE);
 		vBottomDivider.setVisibility(View.GONE);
@@ -385,7 +386,7 @@ public class showStop extends Activity {
 		OnCancelListener onCancelListener = new OnCancelListener() {
 			
 			public void onCancel(DialogInterface dialog) {
-				showStop.this.mDownloadDetourTask.cancel(true);
+				ShowStop.this.mDownloadDetourTask.cancel(true);
 			}
 		};
 		
@@ -402,7 +403,7 @@ public class showStop extends Activity {
 		OnCancelListener onCancelListener = new OnCancelListener() {
 			
 			public void onCancel(DialogInterface dialog) {
-				showStop.this.mDownloadArrivalTask.cancel(true);
+				ShowStop.this.mDownloadArrivalTask.cancel(true);
 			}
 		};
 		
@@ -449,7 +450,7 @@ public class showStop extends Activity {
 	
 	protected void launchShowDetour() {
 		Intent showStopIntent = new Intent();
-		showStopIntent.setClass(getApplicationContext(), showDetour.class);
+		showStopIntent.setClass(getApplicationContext(), ShowDetour.class);
 		startActivity(showStopIntent);
 	}
 
@@ -458,11 +459,11 @@ public class showStop extends Activity {
 	}
 
 	class DownloadArrivalDataTask extends AsyncTask<String, Void, XMLHandler> {
-		private showStop activity = null;
+		private ShowStop activity = null;
 		private boolean isDone = false;
 		private final String TAG = "DownloadArrivalData asyncTask";
 
-		DownloadArrivalDataTask(showStop activity) {
+		DownloadArrivalDataTask(ShowStop activity) {
 			attach(activity);
 		}
 
@@ -470,7 +471,7 @@ public class showStop extends Activity {
 			return isDone;
 		}
 
-		private void attach(showStop activity) {
+		private void attach(ShowStop activity) {
 			this.activity = activity;
 
 		}
@@ -498,7 +499,7 @@ public class showStop extends Activity {
 				activity.showArrivalsDialog();
 			}
 			else{
-				Log.w(TAG, "showStop activity is null");
+				Log.w(TAG, "ShowStop activity is null");
 			}
 		}
 
@@ -517,7 +518,7 @@ public class showStop extends Activity {
 				}
 			}
 			else{
-				Log.w(TAG, "showStop activity is null");
+				Log.w(TAG, "ShowStop activity is null");
 			}
 		}
 		
@@ -532,11 +533,11 @@ public class showStop extends Activity {
 
 	
 	class DownloadDetourDataTask extends AsyncTask<String, Void, XMLHandler> {
-		private showStop activity = null;
+		private ShowStop activity = null;
 		private boolean isDone = false;
 		private final String TAG = "DownloadDetourData asyncTask";
 
-		DownloadDetourDataTask(showStop activity) {
+		DownloadDetourDataTask(ShowStop activity) {
 			attach(activity);
 		}
 
@@ -544,7 +545,7 @@ public class showStop extends Activity {
 			return isDone;
 		}
 
-		private void attach(showStop activity) {
+		private void attach(ShowStop activity) {
 			this.activity = activity;
 
 		}
@@ -572,7 +573,7 @@ public class showStop extends Activity {
 				activity.showDetoursDialog();
 			}
 			else{
-				Log.w(TAG, "showStop activity is null");
+				Log.w(TAG, "ShowStop activity is null");
 			}
 		}
 
@@ -590,7 +591,7 @@ public class showStop extends Activity {
 				}
 			}
 			else{
-				Log.w(TAG, "showStop activity is null");
+				Log.w(TAG, "ShowStop activity is null");
 			}
 		}
 		

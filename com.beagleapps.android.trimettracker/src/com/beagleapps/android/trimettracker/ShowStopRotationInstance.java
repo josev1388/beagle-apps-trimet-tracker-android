@@ -1,8 +1,8 @@
 package com.beagleapps.android.trimettracker;
 
 
-import com.beagleapps.android.trimettracker.showStop.DownloadArrivalDataTask;
-import com.beagleapps.android.trimettracker.showStop.DownloadDetourDataTask;
+import com.beagleapps.android.trimettracker.ShowStop.DownloadArrivalDataTask;
+import com.beagleapps.android.trimettracker.ShowStop.DownloadDetourDataTask;
 
 
 
