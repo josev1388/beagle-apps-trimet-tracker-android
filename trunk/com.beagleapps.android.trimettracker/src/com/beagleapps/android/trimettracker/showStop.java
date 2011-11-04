@@ -7,8 +7,9 @@ import java.util.Date;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -274,9 +275,19 @@ public class showStop extends Activity {
 		case R.id.menuFavorite:
 			onFavoriteClick();
 			return true;
+		case R.id.menuSchedule:
+			onScheduleClick();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void onScheduleClick() {
+		String url = getString(R.string.baseScheduleUrl) + mStopID;  
+		Intent intent = new Intent(Intent.ACTION_VIEW);  
+		intent.setData(Uri.parse(url)); 
+		startActivity(intent);  
 	}
 
 	private void onRefreshClick() {

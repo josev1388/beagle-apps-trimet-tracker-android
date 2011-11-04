@@ -61,4 +61,6 @@
     <string name="welcomeMessage">If you are at a TriMet stop, you can enter the Stop ID from the sign below.\n\nYou can also hit the menu button to find stops manually or find nearby stops using your GPS.\n\nThank you for using my app!</string>
     <string name="noArrivalsTitle">No Arrivals Found</string>
     <string name="noArrivalsMessage">No arrivals could be found for this stop.\n\nNote that TriMet does not currently give out Portland Streetcar arrival data.</string>
+    <string name="baseScheduleUrl">http://trimet.org/go/cgi-bin/cstops.pl?lang=pda&amp;action=entry&amp;Loc=</string>
+    <string name="menuSchedule">View Schedule</string>
 </resources>

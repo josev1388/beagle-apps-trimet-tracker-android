@@ -2,6 +2,6 @@
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:title="@string/menu_findStop" android:icon="@drawable/ic_menu_search" android:id="@+id/menu_findStop"></item>
-    <item android:title="@string/menu_nearbyStops" android:id="@+id/menu_nearbyStops" android:icon="@drawable/ic_menu_mapmode"></item>
+    <item android:title="@string/menu_nearbyStops" android:id="@+id/menu_nearbyStops" android:icon="@drawable/ic_menu_compass"></item>
     
 </menu>
