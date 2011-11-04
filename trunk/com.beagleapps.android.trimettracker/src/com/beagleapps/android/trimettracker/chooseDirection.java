@@ -13,7 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class chooseDirection extends Activity {
+public class ChooseDirection extends Activity {
 	
 	private TextView vRouteDescription;
 	private RoutesDocument mRoutesDocument = null;
@@ -59,7 +59,7 @@ public class chooseDirection extends Activity {
 	
 	public void launchChooseStop() {
 		Intent intent = new Intent();
-		intent.setClass(getApplicationContext(), chooseStop.class);
+		intent.setClass(getApplicationContext(), ChooseStop.class);
 		startActivity(intent);
 	}
 	

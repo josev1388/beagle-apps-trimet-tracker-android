@@ -1,7 +1,7 @@
 package com.beagleapps.android.trimettracker;
 
-import com.beagleapps.android.trimettracker.homepage.DownloadArrivalDataTask;
-import com.beagleapps.android.trimettracker.homepage.DownloadRoutesDataTask;
+import com.beagleapps.android.trimettracker.MainView.DownloadArrivalDataTask;
+import com.beagleapps.android.trimettracker.MainView.DownloadRoutesDataTask;
 
 
 

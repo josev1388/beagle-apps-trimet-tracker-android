@@ -19,7 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class chooseStop extends Activity {
+public class ChooseStop extends Activity {
 
 	private TextView vRouteDesc;
 	private TextView vDirectionDesc;
@@ -128,7 +128,7 @@ public class chooseStop extends Activity {
 		OnCancelListener onCancelListener = new OnCancelListener() {
 			
 			public void onCancel(DialogInterface dialog) {
-				chooseStop.this.mDownloadArrivalTask.cancel(true);
+				ChooseStop.this.mDownloadArrivalTask.cancel(true);
 			}
 		};
 		
@@ -152,16 +152,16 @@ public class chooseStop extends Activity {
 	
 	protected void launchShowStop() {
 		Intent showStopIntent = new Intent();
-		showStopIntent.setClass(getApplicationContext(), showStop.class);
+		showStopIntent.setClass(getApplicationContext(), ShowStop.class);
 		startActivity(showStopIntent);
 	}
 	
 	class DownloadArrivalDataTask extends AsyncTask<String, Void, XMLHandler> {
-		private chooseStop activity = null;
+		private ChooseStop activity = null;
 		private boolean isDone = false;
 		private final String TAG = "DownloadArrivalData asyncTask";
 
-		DownloadArrivalDataTask(chooseStop activity) {
+		DownloadArrivalDataTask(ChooseStop activity) {
 			attach(activity);
 		}
 
@@ -169,7 +169,7 @@ public class chooseStop extends Activity {
 			return isDone;
 		}
 
-		public void attach(chooseStop activity) {
+		public void attach(ChooseStop activity) {
 			this.activity = activity;
 
 		}
