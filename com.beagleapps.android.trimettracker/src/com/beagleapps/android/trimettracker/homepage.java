@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,15 +32,17 @@ public class homepage extends Activity {
 	private static String TAG = "homepage";
 
 	private ArrayList<Favorite> mFavorites = null;
-	private FavoriteAdapter favoriteAdapter;
+	private FavoriteAdapter mFavoriteAdapter;
 	private DBAdapter mDbHelper;
 
-	private ListView favoriteStopsListView;
-	private TextView stopIDTextBox;
-	private Button goButton;
+	private ListView vFavoriteStopsListView;
+	private View vEmptyView;
+
+	private TextView vStopIDTextBox;
+	private Button vGoButton;
 
 	private static ArrivalsDocument mArrivalsDoc;
-	ArrayAdapter<String> listViewAdapter;
+	ArrayAdapter<String> mListViewAdapter;
 	
 	private DownloadArrivalDataTask mDownloadArrivalTask = null;
 	private DownloadRoutesDataTask mDownloadRoutesTask = null;
@@ -57,16 +59,19 @@ public class homepage extends Activity {
 		mDbHelper = new DBAdapter(this);
 		mDbHelper.open();
 
-		favoriteStopsListView = (ListView)findViewById(R.id.favoriteStopsListView);
-		goButton = (Button)findViewById(R.id.goButton);
-		stopIDTextBox = (TextView)findViewById(R.id.stopIDTextBox);
+		vFavoriteStopsListView = (ListView)findViewById(R.id.favoriteStopsListView);
+		vEmptyView = (View)findViewById(R.id.HP_emptyView);
+		vGoButton = (Button)findViewById(R.id.goButton);
+		vStopIDTextBox = (TextView)findViewById(R.id.stopIDTextBox);
 
 		mFavorites = new ArrayList<Favorite>();
 
 		getFavorites();
 
-		favoriteAdapter = new FavoriteAdapter(this, mFavorites);
-		favoriteStopsListView.setAdapter(favoriteAdapter);
+		mFavoriteAdapter = new FavoriteAdapter(this, mFavorites);
+		vFavoriteStopsListView.setAdapter(mFavoriteAdapter);
+		
+		vFavoriteStopsListView.setEmptyView(vEmptyView);
 
 		setupListeners();
 		
@@ -75,10 +80,10 @@ public class homepage extends Activity {
 	}
 
 	private void setupListeners() {
-		goButton.setOnClickListener(new View.OnClickListener() {
+		vGoButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (stopIDTextBox.getText().length() > 0){
-					onStopClick(Integer.parseInt(stopIDTextBox.getText().toString()));
+				if (vStopIDTextBox.getText().length() > 0){
+					onStopClick(Integer.parseInt(vStopIDTextBox.getText().toString()));
 				}
 				else{
 					showError(getString(R.string.errorNoStopID));
@@ -86,7 +91,7 @@ public class homepage extends Activity {
 			}
 		});
 
-		favoriteStopsListView.setOnItemClickListener(new OnItemClickListener() {
+		vFavoriteStopsListView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> a, View v, int position, long id) {
 				onStopClick(mFavorites.get(position).getStopID());
 			}
@@ -183,7 +188,7 @@ public class homepage extends Activity {
 	public void onWindowFocusChanged (boolean hasFocus){
 		if(hasFocus){
 			getFavorites();
-			favoriteAdapter.notifyDataSetChanged();
+			mFavoriteAdapter.notifyDataSetChanged();
 		}
 	}
 

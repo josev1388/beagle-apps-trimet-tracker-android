@@ -34,11 +34,12 @@ public class showStop extends Activity {
 	private int mStopID;
 
 	private ArrayList<Arrival> mArrivals = null;
-	private ArrivalAdapter arrivalAdapter;
+	private ArrivalAdapter mArrivalAdapter;
 
 	private TextView vStopTitle;
 	private TextView vDirection;
 	private ListView vArrivalsListView;
+	private View vEmptyView;
 	private ArrivalsDocument mArrivalsDoc;
 
 	private DBAdapter mDbHelper;
@@ -49,9 +50,9 @@ public class showStop extends Activity {
 	private DownloadDetourDataTask mDownloadDetourTask = null;
 	private ProgressDialog mArrivalsDialog;
 	private ProgressDialog mDetoursDialog;
-	private Button mDetourButton;
-	private View mBottomDivider;
-	private LinearLayout mBottomBar;
+	private Button vDetourButton;
+	private View vBottomDivider;
+	private LinearLayout vBottomBar;
 	
 	// Set when dialog is canceled
 	private long mRefreshDelayTime;
@@ -67,11 +68,12 @@ public class showStop extends Activity {
 		mDbHelper.open();
 
 		vArrivalsListView = (ListView)findViewById(R.id.SS_ArrivalsListView);
+		vEmptyView = (View)findViewById(R.id.SS_emptyView);
 		vStopTitle = (TextView)findViewById(R.id.SS_StopTitle);
 		vDirection= (TextView)findViewById(R.id.SS_StopID);
-		mDetourButton = (Button)findViewById(R.id.SS_DetourButton);
-		mBottomBar = (LinearLayout)findViewById(R.id.SS_BottomBar);
-		mBottomDivider = (View)findViewById(R.id.SS_BottomDivider);
+		vDetourButton = (Button)findViewById(R.id.SS_DetourButton);
+		vBottomBar = (LinearLayout)findViewById(R.id.SS_BottomBar);
+		vBottomDivider = (View)findViewById(R.id.SS_BottomDivider);
 
 		mArrivals = new ArrayList<Arrival>();
 		mArrivalsDoc = new ArrivalsDocument();
@@ -82,8 +84,9 @@ public class showStop extends Activity {
 
 		getArrivals();
 
-		arrivalAdapter = new ArrivalAdapter(this, mArrivals);
-		vArrivalsListView.setAdapter(arrivalAdapter);
+		mArrivalAdapter = new ArrivalAdapter(this, mArrivals);
+		vArrivalsListView.setAdapter(mArrivalAdapter);
+		vArrivalsListView.setEmptyView(vEmptyView);
 
 		handleRotation();
 		setupListeners();
@@ -137,7 +140,7 @@ public class showStop extends Activity {
 	}
 
 	private void setupListeners() {
-		mDetourButton.setOnClickListener(new View.OnClickListener() {
+		vDetourButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				onDetourClick();
 			}
@@ -161,13 +164,13 @@ public class showStop extends Activity {
 	}
 	
 	private void hideDetourButton() {
-		mBottomBar.setVisibility(View.GONE);
-		mBottomDivider.setVisibility(View.GONE);
+		vBottomBar.setVisibility(View.GONE);
+		vBottomDivider.setVisibility(View.GONE);
 	}
 	
 	private void showDetourButton() {
-		mBottomBar.setVisibility(View.VISIBLE);
-		mBottomDivider.setVisibility(View.VISIBLE);
+		vBottomBar.setVisibility(View.VISIBLE);
+		vBottomDivider.setVisibility(View.VISIBLE);
 	}
 
 	// Receiver tells the app to refresh on unlock,
@@ -298,7 +301,7 @@ public class showStop extends Activity {
 
 	private void refreshStopList() {
 		getArrivals();
-		arrivalAdapter.notifyDataSetChanged();
+		mArrivalAdapter.notifyDataSetChanged();
 	}
 
 	private void onFavoriteClick() {
