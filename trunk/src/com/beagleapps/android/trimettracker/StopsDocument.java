@@ -4,7 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class StopsDocument {
+public class StopsDocument extends XMLDocument{
 
 	public static Document mXMLDoc;
 	
@@ -23,7 +23,7 @@ public class StopsDocument {
 	public String getRouteDescription(int index){
 		if (getRoutesNodes() != null){
 			Node routeNode = getRoutesNodes().item(index);
-	        return routeNode.getAttributes().getNamedItem("desc").getNodeValue();
+	        return getAttributeValue(routeNode, "desc");
 		}
 		else {
 			return "";
@@ -31,21 +31,15 @@ public class StopsDocument {
 	}
 	
 	public String getStopsRouteDescription(){
-		
 		Node route = mXMLDoc.getElementsByTagName("route").item(0);
 		
-		if (route != null){
-	        return route.getAttributes().getNamedItem("desc").getNodeValue();
-		}
-		else {
-			return "";
-		}
+		return getAttributeValue(route, "desc");
 	}
 	
 	public String getRouteNumber(int index){
 		if (getRoutesNodes() != null){
 			Node routeNode = getRoutesNodes().item(index);
-	        return routeNode.getAttributes().getNamedItem("route").getNodeValue();
+	        return  getAttributeValue(routeNode, "route");
 		}
 		else{
 			return "";
