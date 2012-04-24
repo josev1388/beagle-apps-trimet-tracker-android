@@ -4,7 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class RoutesDocument {
+public class RoutesDocument extends XMLDocument{
 
 	public static Document mRouteXMLDoc;
 	public static Document mStopsXMLDoc;
@@ -43,7 +43,7 @@ public class RoutesDocument {
 	public String getDirDescription(int dir){
 		if (getDirectionNodes() != null){
 			Node dirNode = getDirectionNodes().item(dir);
-	        return dirNode.getAttributes().getNamedItem("desc").getNodeValue();
+	        return getAttributeValue(dirNode, "desc");
 		}
 		else {
 			return "";
@@ -51,17 +51,17 @@ public class RoutesDocument {
 	}
 	
 	public String getStopDescription(int dir, int index){
-		return getStopNodes(dir).item(index).getAttributes().getNamedItem("desc").getNodeValue();
+		return getAttributeValue(getStopNodes(dir).item(index), "desc");
 	}
 	
 	public String getStopID(int dir, int index){
-		return getStopNodes(dir).item(index).getAttributes().getNamedItem("locid").getNodeValue();
+		return getAttributeValue(getStopNodes(dir).item(index), "locid");
 	}
 	
 	public String getRouteDescription(int index){
 		if (getRoutesNodes() != null){
 			Node routeNode = getRoutesNodes().item(index);
-	        return routeNode.getAttributes().getNamedItem("desc").getNodeValue();
+			return getAttributeValue(routeNode, "desc");
 		}
 		else {
 			return "";
@@ -72,18 +72,13 @@ public class RoutesDocument {
 		
 		Node route = mStopsXMLDoc.getElementsByTagName("route").item(0);
 		
-		if (route != null){
-	        return route.getAttributes().getNamedItem("desc").getNodeValue();
-		}
-		else {
-			return "";
-		}
+		return getAttributeValue(route, "desc");
 	}
 	
 	public String getRouteNumber(int index){
 		if (getRoutesNodes() != null){
 			Node routeNode = getRoutesNodes().item(index);
-	        return routeNode.getAttributes().getNamedItem("route").getNodeValue();
+	        return getAttributeValue(routeNode, "route");
 		}
 		else{
 			return "";

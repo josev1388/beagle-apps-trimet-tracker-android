@@ -9,7 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class ArrivalsDocument {
+public class ArrivalsDocument extends XMLDocument{
 
 	private static final String[] DaysOfWeek = 
 	{"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
@@ -29,7 +29,7 @@ public class ArrivalsDocument {
 		NodeList nodeList = mXMLDoc.getElementsByTagName("location");
         
 		Node locationNode = nodeList.item(0);
-		String stopString = locationNode.getAttributes().getNamedItem("locid").getNodeValue();
+		String stopString = getAttributeValue(locationNode, "locid"); 
 		return Integer.parseInt(stopString);
 	}
 	
@@ -41,14 +41,14 @@ public class ArrivalsDocument {
 		NodeList nodeList = mXMLDoc.getElementsByTagName("location");
 	        
 		Node locationNode = nodeList.item(0);
-        return locationNode.getAttributes().getNamedItem("desc").getNodeValue();
+        return getAttributeValue(locationNode, "desc"); 
 	}
 	
 	public String getDirection(){
 		NodeList nodeList = mXMLDoc.getElementsByTagName("location");
         
 		Node locationNode = nodeList.item(0);
-        return locationNode.getAttributes().getNamedItem("dir").getNodeValue();
+        return getAttributeValue(locationNode, "dir"); 
 	}
 	
 	public String getBusDescription(int index){
@@ -56,10 +56,8 @@ public class ArrivalsDocument {
 		NodeList arrivalNodes = getArrivalNodes();
         
 		Node arrival = arrivalNodes.item(index);
-		
-		if(arrival != null){
-			description = arrival.getAttributes().getNamedItem("shortSign").getNodeValue();
-		}
+		description = getAttributeValue(arrival, "shortSign"); 
+
         return description;
 	}
 	
@@ -67,10 +65,8 @@ public class ArrivalsDocument {
 		String scheduledTime = null;
         
 		Node arrival = getArrivalNodes().item(index);
+		scheduledTime = getAttributeValue(arrival, "scheduled"); 
 		
-		if(arrival != null){
-			scheduledTime = arrival.getAttributes().getNamedItem("scheduled").getNodeValue();
-		}
         return scheduledTime;
 	}
 	
@@ -78,10 +74,8 @@ public class ArrivalsDocument {
 	public String getRequestTime(){
         Node resultSet = mXMLDoc.getElementsByTagName("resultSet").item(0);
 		String requestTime = null;
+		requestTime = getAttributeValue(resultSet, "queryTime");
 		
-		if(resultSet != null){
-			requestTime = resultSet.getAttributes().getNamedItem("queryTime").getNodeValue();
-		}
         return requestTime;
 	}
 	
@@ -91,7 +85,7 @@ public class ArrivalsDocument {
 		Node arrival = getArrivalNodes().item(index);
 		
 		if(arrival != null){
-			long unixTime = Long.parseLong(arrival.getAttributes().getNamedItem("scheduled").getNodeValue());
+			long unixTime = Long.parseLong(getAttributeValue(arrival, "scheduled"));
 			
 			timeText = getReadableTime(unixTime);
 		}
@@ -163,14 +157,14 @@ public class ArrivalsDocument {
 		Node arrival = arrivalNodes.item(index);
 		
 		if(arrival != null){
-			estimatedTime = arrival.getAttributes().getNamedItem("estimated").getNodeValue();
+			estimatedTime = getAttributeValue(arrival, "estimated");
 		}
         return estimatedTime;
 	}
 	
 	public boolean isEstimated(int index){
 		Node arrival = getArrivalNodes().item(index);
-		String status = arrival.getAttributes().getNamedItem("status").getNodeValue();
+		String status = getAttributeValue(arrival, "status");
 		
         return status.compareTo("estimated") == 0;
         
@@ -178,7 +172,7 @@ public class ArrivalsDocument {
 	
 	public boolean hasDetour(int index){
 		Node arrival = getArrivalNodes().item(index);
-		String status = arrival.getAttributes().getNamedItem("detour").getNodeValue();
+		String status = getAttributeValue(arrival, "detour");
 		
         return status.compareTo("true") == 0;
         
@@ -192,8 +186,7 @@ public class ArrivalsDocument {
 		ArrayList<String> busRouteList = new ArrayList<String>();
 		
 		for (int index = 0; index < this.getArrivalNodes().getLength(); ++index) {
-			String routeNumber = 
-				getArrivalNodes().item(index).getAttributes().getNamedItem("route").getNodeValue();;
+			String routeNumber = getAttributeValue(getArrivalNodes().item(index), "route");
 			
 			if (busRouteList.lastIndexOf((routeNumber)) < 0){
 				busRouteList.add(routeNumber);

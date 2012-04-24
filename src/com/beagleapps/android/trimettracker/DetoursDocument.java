@@ -6,7 +6,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class DetoursDocument {
+public class DetoursDocument extends XMLDocument{
 	
 	public static Document mXMLDoc;
 	
@@ -28,15 +28,10 @@ public class DetoursDocument {
 	
 	
 	public String getDetourDescription(int index){
-		String description = null;
 		NodeList detourNodes = getDetourNodes();
-        
 		Node detour = detourNodes.item(index);
 		
-		if(detour != null){
-			description = detour.getAttributes().getNamedItem("desc").getNodeValue();
-		}
-        return description;
+		return getAttributeValue(detour, "desc");
 	}
 
 
@@ -51,7 +46,7 @@ public class DetoursDocument {
 		NodeList routeNodes = getRoutes(index);
 		
 		for (int i=0; i < routeNodes.getLength(); i++){
-			routeList.add(routeNodes.item(i).getAttributes().getNamedItem("route").getNodeValue());
+			routeList.add(getAttributeValue(routeNodes.item(i), "route"));
 		}
 		
 		return RoutesUtilities.parseRouteList(routeList);
