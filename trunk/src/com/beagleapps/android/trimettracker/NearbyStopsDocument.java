@@ -12,15 +12,19 @@ public class NearbyStopsDocument extends XMLDocument{
 	public NearbyStopsDocument(Document document) {
 		NearbyStopsDocument.mXMLDoc = document;
 		mLocationNodes = mXMLDoc.getElementsByTagName("location");
-		
 	}
 	
+	public NearbyStopsDocument() {
+		
+	}
+
 	public static Document getXMLDoc() {
 		return mXMLDoc;
 	}
 
 	public static void setXMLDoc(Document mXMLDoc) {
 		NearbyStopsDocument.mXMLDoc = mXMLDoc;
+		mLocationNodes = mXMLDoc.getElementsByTagName("location");
 	}
 
 	
@@ -41,12 +45,12 @@ public class NearbyStopsDocument extends XMLDocument{
 		return getAttributeValue(getLocationNode(index), "dir");
 	}
 	
-	public String getLat(int index){
-		return getAttributeValue(getLocationNode(index), "lat");
+	public double getLat(int index){
+		return Double.parseDouble(getAttributeValue(getLocationNode(index), "lat"));
 	}
 	
-	public String getLon(int index){
-		return getAttributeValue(getLocationNode(index), "lng");
+	public double getLon(int index){
+		return Double.parseDouble(getAttributeValue(getLocationNode(index), "lng"));
 	}
 	
 	public String getLocationID(int index){

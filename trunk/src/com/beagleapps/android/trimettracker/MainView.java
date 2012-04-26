@@ -377,23 +377,10 @@ public class MainView extends Activity {
 		}
 	}
 	
-	class DownloadRoutesDataTask extends DownloadXMLAsyncTask {
-		private MainView activity = null;
-
+	class DownloadRoutesDataTask extends DownloadXMLAsyncTask<MainView> {
+		
 		DownloadRoutesDataTask(MainView activity) {
-			attach(activity);
-		}
-
-		public boolean isDone() {
-			return isDone;
-		}
-
-		public void attach(MainView activity) {
-			this.activity = activity;
-		}
-
-		public void detach() {
-			activity = null;
+			super(activity);
 		}
 
 		protected XMLHandler doInBackground(String... urls) {
@@ -437,25 +424,10 @@ public class MainView extends Activity {
 		}
 	}
 	
-	class DownloadArrivalDataTask extends DownloadXMLAsyncTask {
-		private MainView activity = null;
-		
+	class DownloadArrivalDataTask extends DownloadXMLAsyncTask<MainView> {
+	
 		DownloadArrivalDataTask(MainView activity) {
-			attach(activity);
-		}
-
-		public boolean isDone() {
-			return isDone;
-		}
-
-		public void attach(MainView activity) {
-			this.activity = activity;
-
-		}
-
-		public void detach() {
-			activity = null;
-
+			super(activity);
 		}
 
 		protected XMLHandler doInBackground(String... urls) {

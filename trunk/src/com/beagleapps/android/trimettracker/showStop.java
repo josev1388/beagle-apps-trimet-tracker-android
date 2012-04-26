@@ -1,6 +1,5 @@
 package com.beagleapps.android.trimettracker;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -10,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -458,25 +456,10 @@ public class ShowStop extends Activity {
 		Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
 	}
 
-	class DownloadArrivalDataTask extends DownloadXMLAsyncTask{
-		private ShowStop activity = null;
+	class DownloadArrivalDataTask extends DownloadXMLAsyncTask<ShowStop>{
 
 		DownloadArrivalDataTask(ShowStop activity) {
-			attach(activity);
-		}
-
-		public boolean isDone() {
-			return isDone;
-		}
-
-		private void attach(ShowStop activity) {
-			this.activity = activity;
-
-		}
-
-		private void detach() {
-			activity = null;
-
+			super(activity);
 		}
 
 		protected void onPreExecute() {
@@ -521,24 +504,10 @@ public class ShowStop extends Activity {
 	}
 
 	
-	class DownloadDetourDataTask extends DownloadXMLAsyncTask{
-		private ShowStop activity = null;
-
+	class DownloadDetourDataTask extends DownloadXMLAsyncTask<ShowStop>{
+		
 		DownloadDetourDataTask(ShowStop activity) {
-			attach(activity);
-		}
-
-		public boolean isDone() {
-			return isDone;
-		}
-
-		private void attach(ShowStop activity) {
-			this.activity = activity;
-
-		}
-
-		public void detach() {
-			activity = null;
+			super(activity);
 		}
 		
 		protected void onPreExecute() {
