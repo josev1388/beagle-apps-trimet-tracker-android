@@ -19,12 +19,16 @@ public class FindNearby extends MapActivity {
 	private StopItemizedOverlay mStopOverlay;
 	private GPSMarkerItemizedOverylay mGPSOverlay;
 	private DownloadNearbyStopsDataTask mDownloadNearbyStopsTask;
+	
+	private NearbyStopsDocument mStopsDocument;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.findnearby);
+		
+		mStopsDocument = new NearbyStopsDocument();
 
 		vMapView = (MapView) findViewById(R.id.FNBMapView);
 		vMapView.setBuiltInZoomControls(true);
@@ -107,29 +111,36 @@ public class FindNearby extends MapActivity {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	public void createStopsOverlay() {
+		int length = mStopsDocument.lengthLocations();
+		for(int i = 0; i < length; i++){
+			GeoPoint geoPoint = getGeoPoint(mStopsDocument.getLat(i), mStopsDocument.getLon(i));
+			String title = mStopsDocument.getDescription(i);
+			String snippet = mStopsDocument.getDirection(i) + " Routes: \n";
+			for(int j = 0; j < mStopsDocument.lengthRoutes(i); j++){
+				snippet += mStopsDocument.getRouteDesc(i, j) + "\n";
+			}
+			OverlayItem item = new OverlayItem(geoPoint, title, snippet);
+			
+			// Add overlay item
+			mStopOverlay.addOverlay(item);
+		}
+		
+		// Then add the overlay list to the mapview
+		vMapView.getOverlays().add(mStopOverlay);
+		
+	}
 
 	protected void showError(String error) {
 		Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT)
 				.show();
 	}
 	
-	class DownloadNearbyStopsDataTask extends DownloadXMLAsyncTask {
-		private FindNearby activity = null;
+	class DownloadNearbyStopsDataTask extends DownloadXMLAsyncTask<FindNearby> {
 
-		DownloadNearbyStopsDataTask(FindNearby activity) {
-			attach(activity);
-		}
-
-		public boolean isDone() {
-			return isDone;
-		}
-
-		public void attach(FindNearby activity) {
-			this.activity = activity;
-		}
-
-		public void detach() {
-			activity = null;
+		public DownloadNearbyStopsDataTask(FindNearby activity) {
+			super(activity);
 		}
 
 		protected void onPreExecute() {
@@ -151,9 +162,9 @@ public class FindNearby extends MapActivity {
 				if (newXmlHandler.hasError())
 					activity.showError(newXmlHandler.getError());
 				else{
-					NearbyStopsDocument.mXMLDoc = newXmlHandler.getXmlDoc();
+					NearbyStopsDocument.setXMLDoc(newXmlHandler.getXmlDoc());
 				
-					//activity.launchChooseRoute();
+					activity.createStopsOverlay();
 				}
 			}
 			else{
@@ -161,5 +172,4 @@ public class FindNearby extends MapActivity {
 			}
 		}
 	}
-
 }

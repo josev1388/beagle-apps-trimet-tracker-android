@@ -187,27 +187,12 @@ public class ChooseRoute extends Activity {
 		return(mDownloadRoutesDataTask);
 	}
 
-	private static class DownloadRoutesDataTask extends DownloadXMLAsyncTask {
-		private ChooseRoute activity = null;
-		
+	private static class DownloadRoutesDataTask extends DownloadXMLAsyncTask<ChooseRoute> {
+
 		DownloadRoutesDataTask(ChooseRoute activity) {
-			attach(activity);
+			super(activity);
 		}
-
-		public boolean isDone() {
-			return isDone;
-		}
-
-		private void attach(ChooseRoute activity) {
-			this.activity = activity;
-
-		}
-
-		private void detach() {
-			activity = null;
-
-		}
-
+		
 		protected XMLHandler doInBackground(String... urls) {
 			XMLHandler newXmlHandler = null;
 			try {

@@ -5,13 +5,25 @@ import java.net.MalformedURLException;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public abstract class DownloadXMLAsyncTask extends AsyncTask<String, Void, XMLHandler> {
-
+public abstract class DownloadXMLAsyncTask<ActivityType> extends AsyncTask<String, Void, XMLHandler> {
+	protected ActivityType activity = null;
 	protected boolean isDone = false;
 	protected final String TAG = "DownloadXMLAsyncTask";
 
 	DownloadXMLAsyncTask() {
 		
+	}
+	
+	DownloadXMLAsyncTask(ActivityType activity) {
+		attach(activity);
+	}
+	
+	public void attach(ActivityType activity) {
+		this.activity = activity;
+	}
+
+	public void detach() {
+		activity = null;
 	}
 
 	public boolean isDone() {

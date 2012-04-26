@@ -155,26 +155,12 @@ public class ChooseStop extends Activity {
 		startActivity(showStopIntent);
 	}
 	
-	class DownloadArrivalDataTask extends DownloadXMLAsyncTask {
-		private ChooseStop activity = null;
+	class DownloadArrivalDataTask extends DownloadXMLAsyncTask<ChooseStop> {
 		
 		DownloadArrivalDataTask(ChooseStop activity) {
-			attach(activity);
+			super(activity);
 		}
 
-		public boolean isDone() {
-			return isDone;
-		}
-
-		public void attach(ChooseStop activity) {
-			this.activity = activity;
-
-		}
-
-		public void detach() {
-			activity = null;
-
-		}
 
 		protected XMLHandler doInBackground(String... urls) {
 			XMLHandler newXmlHandler = null;
