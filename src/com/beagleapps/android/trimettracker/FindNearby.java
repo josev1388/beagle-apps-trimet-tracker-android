@@ -1,5 +1,10 @@
 package com.beagleapps.android.trimettracker;
 
+import java.util.ArrayList;
+
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
@@ -19,6 +24,7 @@ public class FindNearby extends MapActivity {
 	private StopItemizedOverlay mStopOverlay;
 	private GPSMarkerItemizedOverylay mGPSOverlay;
 	private DownloadNearbyStopsDataTask mDownloadNearbyStopsTask;
+	private ProgressDialog mFindingStopsDialog;
 	
 	private NearbyStopsDocument mStopsDocument;
 
@@ -36,7 +42,34 @@ public class FindNearby extends MapActivity {
 		setupMapOverylays();
 
 		getGPSLocation();
+		
+		
+		// TODO I'm disabling rotation for now, might fix later
+		//handleRotation();
 
+	}
+	
+	private void handleRotation() {
+		mDownloadNearbyStopsTask = (DownloadNearbyStopsDataTask)getLastNonConfigurationInstance();
+		
+		if (mDownloadNearbyStopsTask != null){
+			mDownloadNearbyStopsTask.attach(this);
+			if (mDownloadNearbyStopsTask.isDone()){
+				dismissFindingStopsDialog();
+			}
+			else{
+				showFindingStopsDialog();
+			}
+		}
+	}
+	
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		if (mDownloadNearbyStopsTask != null){
+			mDownloadNearbyStopsTask.detach();
+		}
+
+		return(mDownloadNearbyStopsTask);
 	}
 
 	private void setupMapOverylays() {
@@ -95,7 +128,6 @@ public class FindNearby extends MapActivity {
 		else{
 			Connectivity.showErrorToast(getApplicationContext());
 		}
-
 	}
 
 	private void centerMapOnLocation(Location location) {
@@ -108,23 +140,29 @@ public class FindNearby extends MapActivity {
 
 	@Override
 	protected boolean isRouteDisplayed() {
-		// TODO Auto-generated method stub
+		// Method required for this activity.
 		return false;
 	}
 	
 	public void createStopsOverlay() {
 		int length = mStopsDocument.lengthLocations();
+		ArrayList<Route> routeList = new ArrayList<Route>();
+		ArrayList<String> stopIDList = new ArrayList<String>();
+		
 		for(int i = 0; i < length; i++){
+			routeList.clear();
 			GeoPoint geoPoint = getGeoPoint(mStopsDocument.getLat(i), mStopsDocument.getLon(i));
 			String title = mStopsDocument.getDescription(i);
-			String snippet = mStopsDocument.getDirection(i) + " Routes: \n";
+			String direction = mStopsDocument.getDirection(i);
+			String stopID = mStopsDocument.getLocationID(i);
+		
 			for(int j = 0; j < mStopsDocument.lengthRoutes(i); j++){
-				snippet += mStopsDocument.getRouteDesc(i, j) + "\n";
+				routeList.add(new Route(mStopsDocument.getRouteDesc(i, j), mStopsDocument.getRouteNumber(i, j)));
 			}
-			OverlayItem item = new OverlayItem(geoPoint, title, snippet);
+			OverlayItem item = new OverlayItem(geoPoint, title, direction);
 			
 			// Add overlay item
-			mStopOverlay.addOverlay(item);
+			mStopOverlay.addOverlay(item, (ArrayList<Route>) routeList.clone(), stopID);
 		}
 		
 		// Then add the overlay list to the mapview
@@ -137,6 +175,32 @@ public class FindNearby extends MapActivity {
 				.show();
 	}
 	
+	private void showFindingStopsDialog(){
+		setupDialog();
+		mFindingStopsDialog.show();
+	}
+
+	private void dismissFindingStopsDialog(){
+		mFindingStopsDialog.dismiss();
+	}
+	
+	private void setupDialog(){
+		mFindingStopsDialog = null;
+		mFindingStopsDialog = new ProgressDialog(this);
+		mFindingStopsDialog.setMessage(getString(R.string.dialogFindingStops));
+		mFindingStopsDialog.setIndeterminate(true);
+		mFindingStopsDialog.setCancelable(true);
+		
+		OnCancelListener onCancelListener = new OnCancelListener() {
+			
+			public void onCancel(DialogInterface dialog) {
+				mDownloadNearbyStopsTask.cancel(true);
+			}
+		};
+		
+		mFindingStopsDialog.setOnCancelListener(onCancelListener);
+	}
+	
 	class DownloadNearbyStopsDataTask extends DownloadXMLAsyncTask<FindNearby> {
 
 		public DownloadNearbyStopsDataTask(FindNearby activity) {
@@ -147,7 +211,7 @@ public class FindNearby extends MapActivity {
 			isDone = false;
 			
 			if (activity != null){
-				//activity.showRoutesDialog();
+				activity.showFindingStopsDialog();
 			}
 			else{
 				Log.w(TAG, "FindNearby activity is null");
@@ -158,7 +222,7 @@ public class FindNearby extends MapActivity {
 			isDone = true;
 			
 			if (activity != null){
-				//activity.dismissRoutesDialog();
+				activity.dismissFindingStopsDialog();
 				if (newXmlHandler.hasError())
 					activity.showError(newXmlHandler.getError());
 				else{

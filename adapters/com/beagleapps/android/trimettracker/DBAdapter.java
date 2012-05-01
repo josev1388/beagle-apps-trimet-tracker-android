@@ -17,6 +17,7 @@ public class DBAdapter {
 	private static final String VERSION_TABLE = "version_table";
 	private static final String KEY_VERSION_ID = "version_number";
 	private static final String KEY_VERSION_NUMBER = "version_id";
+	public static final String NO_VERSION_FOUND = "No Version Found";
 	private Context context;
 	private SQLiteDatabase database;
 	private DatabaseHelper dbHelper;
@@ -114,7 +115,7 @@ public class DBAdapter {
 			return mCursor.getString(mCursor.getColumnIndex(KEY_VERSION_NUMBER));
 		}
 		else{
-			return "No Version Found";
+			return NO_VERSION_FOUND;
 		}
 		
 	}

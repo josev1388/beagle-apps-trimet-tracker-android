@@ -4,7 +4,7 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="9" />
+    <uses-sdk android:minSdkVersion="8" />
     
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -29,9 +29,14 @@
         <activity android:name=".ChooseStop"
         android:windowSoftInputMode="stateAlwaysHidden"></activity>
         <activity android:name=".ShowDetour"></activity>
-        <activity android:name=".FindNearby"></activity>
+        <activity android:name=".FindNearby"
+            android:screenOrientation="portrait"></activity>
         
         <uses-library android:required="true" android:name="com.google.android.maps" />
+        <activity android:name="AboutScreen"></activity>
+        <activity android:name="FindNearbyPopup"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog"></activity>
 
     </application>
     

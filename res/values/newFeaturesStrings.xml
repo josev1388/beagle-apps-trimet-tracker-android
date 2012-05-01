@@ -1,5 +1,5 @@
 
 <resources>
-    <string name="PopupMessage">New Features:\n\n• List of stuff\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item\n• Second Item</string>
+    <string name="PopupMessage">New Features: \n</string>
     <string name="PopupTitle">TriMet Tracker 1.0</string>
 </resources>
