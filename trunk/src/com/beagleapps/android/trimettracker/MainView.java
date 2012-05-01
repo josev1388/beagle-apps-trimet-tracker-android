@@ -89,7 +89,7 @@ public class MainView extends Activity {
 			String currentVersion = ManifestUtils.getCurrentVersion(this);
 			String dbVersion = mDbHelper.fetchVersion();
 			//showError("Manifest Version: "+currentVersion+ " DB Version: "+ dbVersion);
-			if (dbVersion.compareTo(currentVersion) != 0){
+			if (dbVersion.compareTo(currentVersion) != 0 && !dbVersion.equals(mDbHelper.NO_VERSION_FOUND)){
 				mDbHelper.setCurrentVersion(currentVersion);
 				showNewFeaturesDialog();
 			}
@@ -169,14 +169,21 @@ public class MainView extends Activity {
 		case R.id.menu_nearbyStops:
 			onFindNearybyClick();
 			return true;
+		case R.id.menu_about:
+			onAboutClick();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
 	
+	private void onAboutClick() {
+		Intent aboutIntent = new Intent();
+		aboutIntent.setClass(getApplicationContext(), AboutScreen.class);
+		startActivity(aboutIntent);
+	}
+
 	private void onFindNearybyClick() {
-		//showNewFeaturesDialog();
-		
 		Intent showStopIntent = new Intent();
 		showStopIntent.setClass(getApplicationContext(), FindNearby.class);
 		startActivity(showStopIntent);

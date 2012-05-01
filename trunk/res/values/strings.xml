@@ -49,6 +49,7 @@
     <string name="menu_findStop">Find A Stop</string>
     <string name="menu_nearbyStops">Find Nearby Stops</string>
     <string name="dialogGettingRoutes">Retrieving Route Information</string>
+    <string name="dialogFindingStops">Retrieving Stop Information</string>
     <string name="dialogGettingDetours">Retrieving Detour Information</string>
     <string name="CR_Filter">Go</string>
     <string name="CR_TextTip">Type a route # or name</string>
@@ -58,10 +59,16 @@
     <string name="DetoursActiveButton">Detours Active</string>
     <string name="baseDetourUrl">http://developer.trimet.org/ws/V1/detours?appID=4830CC8DCF9D9BE9EB56D3256&amp;routes=</string>
     <string name="welcomeTitle">Welcome to TriMet Tracker</string>
-    <string name="welcomeMessage">If you are at a TriMet stop, you can enter the Stop ID from the sign below.\n\nYou can also hit the menu button to find stops manually or find nearby stops using your GPS.\n\nThank you for using my app!</string>
+    <string name="welcomeMessage">If you are at a TriMet stop, you can enter the Stop ID from the sign below.\n\nYou can also hit the menu button to find stops manually or find nearby stops using your GPS.\n\nAs you add stops to your favorites, they will show up here for quick access.\n\nThank you for using my app!</string>
     <string name="noArrivalsTitle">No Arrivals Found</string>
     <string name="noArrivalsMessage">No arrivals could be found for this stop.\n\nNote that TriMet does not currently make Portland Streetcar arrival data available.</string>
     <string name="baseScheduleUrl">http://trimet.org/go/cgi-bin/cstops.pl?lang=pda&amp;action=entry&amp;Loc=</string>
     <string name="menuSchedule">View Schedule</string>
     <string name="baseStopsSearchUrl">http://developer.trimet.org/ws/V1/stops/appid/4830CC8DCF9D9BE9EB56D3256/showRoutes/true/feet/2640/ll/</string>
+    <string name="menu_about">About</string>
+    <string name="companyName">Beagle Apps</string>
+    <string name="authorName">Joe Pinsonault</string>
+    <string name="getArrivalInformation">Get Arrival Information</string>
+    <string name="routesAtThisStop">Routes at this stop:</string>
+    <string name="direction">Direction</string>
 </resources>
