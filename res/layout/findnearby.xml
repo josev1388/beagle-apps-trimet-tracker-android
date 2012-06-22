@@ -22,8 +22,8 @@
 		android:background="@drawable/top_bar" android:layout_height="52dp">
 			<EditText android:layout_width="wrap_content" android:hint="@string/FNB_TextTip"
 				android:layout_gravity="bottom" android:cursorVisible="true"
-				android:layout_weight="2" android:layout_height="wrap_content" android:layout_marginRight="1dp"
-				android:id="@+id/FNB_FilterTextBox" android:inputType="textFilter">
+				android:layout_weight="2" android:layout_height="wrap_content" android:layout_marginRight="5dp"
+				android:id="@+id/FNB_FilterTextBox" android:inputType="textFilter" android:layout_marginLeft="5dp">
 				<requestFocus></requestFocus>
 			</EditText>
 	</LinearLayout>
