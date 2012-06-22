@@ -45,22 +45,28 @@ public final class RoutesUtilities {
 		 
 		 
 		 for (int index = 0; index < routeList.size(); ++index){
-			 if (!Arrays.asList(RoutesToExclude).contains(routeList.get(index))){
-				 int location = Arrays.asList(NamedRoutes).lastIndexOf(routeList.get(index));
-				 
-				 //If named, grab the name
-				 if (location >= 0){
-					 newList.add(RouteNames[location]);
-				 }
-				 // If not, just continue
-				 else{
-					 newList.add(routeList.get(index));
-				 }
-				 
-			 }
+			 String parsedRoute = parseRoute(routeList.get(index));
+			 newList.add(parsedRoute);
 		 }
 		
 		return join(newList, ", ");
+	}
+	
+	public static String parseRoute(String routeNumber){
+		String parsedRoute = routeNumber;
+			
+		if (!Arrays.asList(RoutesToExclude).contains(routeNumber)){
+			 int location = Arrays.asList(NamedRoutes).lastIndexOf(routeNumber);
+			 
+			 // If named, grab the name
+			 if (location >= 0){
+				 parsedRoute = RouteNames[location];
+			 }
+			 // If not, just continue and return unchanged string			 
+			 
+		}
+		
+		return parsedRoute;
 	}
 	
 	

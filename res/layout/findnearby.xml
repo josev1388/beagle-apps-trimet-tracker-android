@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.maps.MapView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/FNBMapView"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:clickable="true"
-    android:apiKey="0K0aR6CD-L6vZW4xPLlrp6gXEhAgpto0MI-H3Tw"
-/>
+
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+  
+	<com.google.android.maps.MapView
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/FNBMapView"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:clickable="true"
+	    android:apiKey="0K0aR6CD-L6vZW4xPLlrp6gXEhAgpto0MI-H3Tw" android:layout_weight="1"/>
+	
+	<View android:layout_width="fill_parent" android:layout_height="1px"
+			android:background="@drawable/divider_grey" android:id="@+id/divider2">
+	</View>
+	<LinearLayout android:layout_width="match_parent"
+		android:id="@+id/FNB_BottomBar" android:layout_gravity="bottom"
+		android:background="@drawable/top_bar" android:layout_height="52dp">
+			<EditText android:layout_width="wrap_content" android:hint="@string/FNB_TextTip"
+				android:layout_gravity="bottom" android:cursorVisible="true"
+				android:layout_weight="2" android:layout_height="wrap_content" android:layout_marginRight="1dp"
+				android:id="@+id/FNB_FilterTextBox" android:inputType="textFilter">
+				<requestFocus></requestFocus>
+			</EditText>
+	</LinearLayout>
+</LinearLayout>

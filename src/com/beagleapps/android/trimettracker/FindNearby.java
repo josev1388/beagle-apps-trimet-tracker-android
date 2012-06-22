@@ -8,13 +8,17 @@ import android.content.DialogInterface.OnCancelListener;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beagleapps.android.trimettracker.MainView.DownloadRoutesDataTask;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -33,6 +37,7 @@ public class FindNearby extends MapActivity {
 
 	private NearbyStopsDocument mStopsDocument;
 	private LocationHandler mLocationHandler;
+	private TextView vRouteFilterTextView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,12 +47,14 @@ public class FindNearby extends MapActivity {
 		
 		mStopsDocument = new NearbyStopsDocument();
 
+		vRouteFilterTextView = (TextView)findViewById(R.id.FNB_FilterTextBox);
 		vMapView = (MapView) findViewById(R.id.FNBMapView);
 		vMapView.setBuiltInZoomControls(true);
 
 		mCurrentLocation = null;
 
 		setupMapOverylays();
+		setupListeners();
 
 		getGPSLocation();
 		
@@ -106,6 +113,26 @@ public class FindNearby extends MapActivity {
 		}
 
 		return(mDownloadNearbyStopsTask);
+	}
+	
+	private void setupListeners() {
+		
+		vRouteFilterTextView.addTextChangedListener(new TextWatcher() {
+			
+			public void onTextChanged(CharSequence s, int start, int before, int count) {	}
+			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {	}
+			
+			public void afterTextChanged(Editable s) {
+				onFilterTextChange();
+			}
+		});
+		
+	}
+
+	protected void onFilterTextChange() {
+		String routeFilter = vRouteFilterTextView.getText().toString().toLowerCase();
+		setupStopsOverylay(routeFilter);
 	}
 
 	private void setupMapOverylays() {
@@ -200,8 +227,13 @@ public class FindNearby extends MapActivity {
 		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void setupStopsOverylay() {
+		setupStopsOverylay(null);
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void setupStopsOverylay(String routeFilter) {
 		int length = mStopsDocument.lengthLocations();
 		ArrayList<Route> routeList = new ArrayList<Route>();
 		ArrayList<String> stopIDList = new ArrayList<String>();
@@ -216,18 +248,24 @@ public class FindNearby extends MapActivity {
 			String stopID = mStopsDocument.getLocationID(i);
 		
 			for(int j = 0; j < mStopsDocument.lengthRoutes(i); j++){
-				routeList.add(new Route(mStopsDocument.getRouteDesc(i, j), mStopsDocument.getRouteNumber(i, j)));
+				String routeNumber = mStopsDocument.getRouteNumber(i, j);
+				String routeDesc = mStopsDocument.getRouteDesc(i, j);
+				if(routeFilter == null || routeNumber.toLowerCase().contains(routeFilter)){
+					routeList.add(new Route(routeDesc, routeNumber));
+				}
 			}
-			OverlayItem item = new OverlayItem(geoPoint, title, direction);
 			
-			// Add overlay item
-			mStopOverlay.addOverlay(item, (ArrayList<Route>) routeList.clone(), stopID);
+			if(routeList.size() > 0){
+				OverlayItem item = new OverlayItem(geoPoint, title, direction);
+				
+				// Add overlay item
+				mStopOverlay.addOverlay(item, (ArrayList<Route>) routeList.clone(), stopID);
+			}
 		}
 		
 		// Then add the overlay list to the mapview
 		vMapView.getOverlays().add(mStopOverlay);
 		vMapView.postInvalidate();
-		
 	}
 
 	protected void showError(String error) {
