@@ -50,6 +50,7 @@
     <string name="menu_nearbyStops">Find Nearby Stops</string>
     <string name="dialogGettingRoutes">Retrieving Route Information</string>
     <string name="dialogFindingStops">Retrieving Stop Information</string>
+    <string name="dialogFindingLocation">Retrieving GPS Location</string>
     <string name="dialogGettingDetours">Retrieving Detour Information</string>
     <string name="CR_Filter">Go</string>
     <string name="CR_TextTip">Type a route # or name</string>
@@ -71,4 +72,6 @@
     <string name="getArrivalInformation">Get Arrival Information</string>
     <string name="routesAtThisStop">Routes at this stop:</string>
     <string name="direction">Direction</string>
+    <string name="problemGettingGPS">There was a problem getting your GPS location.</string>
+    <string name="GPSDisabled">Problem: GPS is not enabled on your device</string>
 </resources>

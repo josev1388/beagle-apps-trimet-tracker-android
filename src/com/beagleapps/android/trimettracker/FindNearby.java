@@ -9,6 +9,9 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -21,12 +24,15 @@ import com.google.android.maps.OverlayItem;
 public class FindNearby extends MapActivity {
 	private MapView vMapView;
 	private LocationHandler.LocationResult mLocationResult;
+	private Location mCurrentLocation;
 	private StopItemizedOverlay mStopOverlay;
 	private GPSMarkerItemizedOverylay mGPSOverlay;
 	private DownloadNearbyStopsDataTask mDownloadNearbyStopsTask;
 	private ProgressDialog mFindingStopsDialog;
-	
+	private ProgressDialog mGettingGPSDialog;
+
 	private NearbyStopsDocument mStopsDocument;
+	private LocationHandler mLocationHandler;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -39,6 +45,8 @@ public class FindNearby extends MapActivity {
 		vMapView = (MapView) findViewById(R.id.FNBMapView);
 		vMapView.setBuiltInZoomControls(true);
 
+		mCurrentLocation = null;
+
 		setupMapOverylays();
 
 		getGPSLocation();
@@ -49,7 +57,35 @@ public class FindNearby extends MapActivity {
 
 	}
 	
-	private void handleRotation() {
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.find_nearby_menu, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		return super.onPrepareOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.menuRefresh:
+			onRefreshClick();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	private void onRefreshClick() {
+		getGPSLocation();
+	}
+
+	/*private void handleRotation() {
 		mDownloadNearbyStopsTask = (DownloadNearbyStopsDataTask)getLastNonConfigurationInstance();
 		
 		if (mDownloadNearbyStopsTask != null){
@@ -61,7 +97,7 @@ public class FindNearby extends MapActivity {
 				showFindingStopsDialog();
 			}
 		}
-	}
+	}*/
 	
 	@Override
 	public Object onRetainNonConfigurationInstance() {
@@ -95,15 +131,31 @@ public class FindNearby extends MapActivity {
 		mLocationResult = new LocationHandler.LocationResult() {
 			@Override
 			public void gotLocation(Location location) {
-				centerMapOnLocation(location);
-				placeGPSMarker(location);
-
-				getTrimetData(location);
+				mCurrentLocation = new Location(location);
+				
+				if(mCurrentLocation != null){
+					centerMapOnLocation(mCurrentLocation);
+					
+					// Clear out the overlays first
+					vMapView.getOverlays().clear();
+					placeGPSMarker(mCurrentLocation);
+					dismissGettingGPSDialog();
+					getTrimetData(mCurrentLocation);
+				}
+				else{
+					showError(getString(R.string.problemGettingGPS));
+				}
+				
 			}
 		};
 
-		LocationHandler locationHandler = new LocationHandler();
-		locationHandler.getLocation(this, mLocationResult);
+		mLocationHandler = new LocationHandler();
+		boolean success = mLocationHandler.getLocation(this, mLocationResult);
+		showGettingGPSDialog();
+		
+		if(!success){
+			showError(getString(R.string.GPSDisabled));
+		}
 
 	}
 
@@ -111,9 +163,13 @@ public class FindNearby extends MapActivity {
 		OverlayItem currentPosition = new OverlayItem(getGeoPoint(location), null, null);
 		
 		// Add overlay item
+		mGPSOverlay.clearOverlays();
 		mGPSOverlay.addOverlay(currentPosition);
+		
 		// Then add the overlay list to the mapview
 		vMapView.getOverlays().add(mGPSOverlay);
+		// Refresh overlays
+		vMapView.postInvalidate();
 
 	}
 
@@ -144,10 +200,13 @@ public class FindNearby extends MapActivity {
 		return false;
 	}
 	
-	public void createStopsOverlay() {
+	@SuppressWarnings("unchecked")
+	public void setupStopsOverylay() {
 		int length = mStopsDocument.lengthLocations();
 		ArrayList<Route> routeList = new ArrayList<Route>();
 		ArrayList<String> stopIDList = new ArrayList<String>();
+		
+		mStopOverlay.clearOverlays();
 		
 		for(int i = 0; i < length; i++){
 			routeList.clear();
@@ -167,6 +226,7 @@ public class FindNearby extends MapActivity {
 		
 		// Then add the overlay list to the mapview
 		vMapView.getOverlays().add(mStopOverlay);
+		vMapView.postInvalidate();
 		
 	}
 
@@ -175,8 +235,34 @@ public class FindNearby extends MapActivity {
 				.show();
 	}
 	
+	private void showGettingGPSDialog(){
+		setupGettingGPSDialog();
+		mGettingGPSDialog.show();
+	}
+
+	private void dismissGettingGPSDialog(){
+		mGettingGPSDialog.dismiss();
+	}
+	
+	private void setupGettingGPSDialog(){
+		mGettingGPSDialog = null;
+		mGettingGPSDialog = new ProgressDialog(this);
+		mGettingGPSDialog.setMessage(getString(R.string.dialogFindingLocation));
+		mGettingGPSDialog.setIndeterminate(true);
+		mGettingGPSDialog.setCancelable(true);
+		
+		OnCancelListener onCancelListener = new OnCancelListener() {
+			
+			public void onCancel(DialogInterface dialog) {
+				mLocationHandler.stopLocationUpdates();
+			}
+		};
+		
+		mGettingGPSDialog.setOnCancelListener(onCancelListener);
+	}
+	
 	private void showFindingStopsDialog(){
-		setupDialog();
+		setupFindingStopsDialog();
 		mFindingStopsDialog.show();
 	}
 
@@ -184,7 +270,7 @@ public class FindNearby extends MapActivity {
 		mFindingStopsDialog.dismiss();
 	}
 	
-	private void setupDialog(){
+	private void setupFindingStopsDialog(){
 		mFindingStopsDialog = null;
 		mFindingStopsDialog = new ProgressDialog(this);
 		mFindingStopsDialog.setMessage(getString(R.string.dialogFindingStops));
@@ -228,7 +314,7 @@ public class FindNearby extends MapActivity {
 				else{
 					NearbyStopsDocument.setXMLDoc(newXmlHandler.getXmlDoc());
 				
-					activity.createStopsOverlay();
+					activity.setupStopsOverylay();
 				}
 			}
 			else{

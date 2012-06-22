@@ -20,6 +20,11 @@ public class GPSMarkerItemizedOverylay extends ItemizedOverlay {
 		mOverlays.add(overlay);
 		populate();
 	}
+	
+	public void clearOverlays() {
+		mOverlays.clear();
+		populate();
+	}
 
 	@Override
 	protected OverlayItem createItem(int i) {
