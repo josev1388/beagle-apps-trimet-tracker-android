@@ -30,6 +30,13 @@ public class StopItemizedOverlay extends ItemizedOverlay {
 		mStopIDList.add(stopID);
 		populate();
 	}
+	
+	public void clearOverlays() {
+		mOverlays.clear();
+		mRouteList.clear();
+		mStopIDList.clear();
+		populate();
+	}
 
 	@Override
 	protected OverlayItem createItem(int i) {
