@@ -54,6 +54,7 @@
     <string name="dialogGettingDetours">Retrieving Detour Information</string>
     <string name="CR_Filter">Go</string>
     <string name="CR_TextTip">Type a route # or name</string>
+    <string name="FNB_TextTip">Type a route # or name</string>
     <string name="baseRoutesURL">http://developer.trimet.org/ws/V1/routeConfig/appid/4830CC8DCF9D9BE9EB56D3256/</string>
     <string name="errorGeneric">Error: There was a problem getting the data</string>
     <string name="endRoutesURL">dir/true/stops/route/</string>
