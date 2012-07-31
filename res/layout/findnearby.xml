@@ -5,6 +5,26 @@
 	android:orientation="vertical"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
+	
+    <LinearLayout android:layout_height="wrap_content"
+		android:id="@+id/FN_topBar" android:layout_width="match_parent"
+		android:baselineAligned="false" android:layout_gravity="center"
+		android:orientation="vertical" android:background="@drawable/top_bar">
+		<View android:background="@drawable/divider_grey"
+			android:layout_width="fill_parent" android:layout_height="1px"
+			android:id="@+id/divider_"></View>
+		<View android:background="@drawable/divider_white"
+			android:layout_width="fill_parent" android:layout_height="1px"
+			android:id="@+id/divider_"></View>
+		<TextView android:textSize="22sp" android:paddingLeft="10dp"
+			android:text="@string/FN_Title" android:id="@+id/FN_Title"
+			android:paddingRight="10dp" android:layout_height="wrap_content"
+			android:paddingTop="5dp" android:layout_width="wrap_content"
+			android:layout_gravity="center" android:paddingBottom="5dp"></TextView>
+		<View android:background="@drawable/divider_black"
+			android:layout_width="fill_parent" android:layout_height="1px"
+			android:id="@+id/divider_"></View>
+	</LinearLayout>
   
 	<com.google.android.maps.MapView
 	    xmlns:android="http://schemas.android.com/apk/res/android"

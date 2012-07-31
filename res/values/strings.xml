@@ -76,4 +76,5 @@
     <string name="problemGettingGPS">There was a problem getting your GPS location.</string>
     <string name="GPSDisabled">Problem: GPS is not enabled on your device</string>
     <string name="admob_publisher_id">a14fee70c1792b4</string>
+    <string name="FN_Title">Find A Nearby Stop</string>
 </resources>
