@@ -78,12 +78,10 @@ public class FindNearby extends MapActivity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.menuRefresh:
+		if (item.getItemId() == R.id.menuRefresh) {
 			onRefreshClick();
 			return true;
-		default:
+		} else {
 			return super.onOptionsItemSelected(item);
 		}
 	}

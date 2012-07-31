@@ -23,9 +23,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 public class MainView extends Activity {
 	/** Called when the activity is first created. */
@@ -83,6 +88,7 @@ public class MainView extends Activity {
 
 		checkVersion();
 	}
+
 
 	private void checkVersion() {
 		try {
@@ -161,18 +167,16 @@ public class MainView extends Activity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.menu_findStop:
+		if (item.getItemId() == R.id.menu_findStop) {
 			onFindStopClick();
 			return true;
-		case R.id.menu_nearbyStops:
+		} else if (item.getItemId() == R.id.menu_nearbyStops) {
 			onFindNearybyClick();
 			return true;
-		case R.id.menu_about:
+		} else if (item.getItemId() == R.id.menu_about) {
 			onAboutClick();
 			return true;
-		default:
+		} else {
 			return super.onOptionsItemSelected(item);
 		}
 	}
