@@ -20,7 +20,7 @@
     <string name="errorNoStopID">Please enter a stop ID</string>
     <string name="scheduled">Scheduled</string>
     <string-array name="NamedRoutes">
-    <item>90</item>
+    <item>90</item>a14fee70c1792b4  a14fee70c1792b4a14fee70c1792b4
     <item>100</item>
     <item>200</item>
     <item>190</item>
@@ -75,4 +75,5 @@
     <string name="direction">Direction</string>
     <string name="problemGettingGPS">There was a problem getting your GPS location.</string>
     <string name="GPSDisabled">Problem: GPS is not enabled on your device</string>
+    <string name="admob_publisher_id">a14fee70c1792b4</string>
 </resources>

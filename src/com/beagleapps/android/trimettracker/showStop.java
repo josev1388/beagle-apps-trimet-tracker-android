@@ -3,6 +3,10 @@ package com.beagleapps.android.trimettracker;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -55,6 +59,9 @@ public class ShowStop extends Activity {
 	
 	// Set when dialog is canceled
 	private long mRefreshDelayTime;
+	
+	// Admob Ad
+	private AdView vAdView;
 
 
 	@Override
@@ -92,6 +99,25 @@ public class ShowStop extends Activity {
 		
 		// Check for detours, display button
 		handleDetours();
+		
+		// Uncomment for the free version
+		//setupAd();
+	}
+	
+	private void setupAd() {
+		// Create the adView
+		vAdView = new AdView(this, AdSize.BANNER, getString(R.string.admob_publisher_id));
+
+	    LinearLayout layout = (LinearLayout)findViewById(R.id.showstopLinearLayout);
+
+	    // Add the adView to it
+	    layout.addView(vAdView);
+
+	    // Initiate a generic request to load it with an ad
+	    AdRequest adRequest = new AdRequest();
+	    adRequest.addTestDevice("F51ECFD2E2C9524C7DA20C5C59C8DE1A");
+	    vAdView.loadAd(adRequest);
+		
 	}
 
 	private void handleRotation() {
@@ -265,22 +291,22 @@ public class ShowStop extends Activity {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.menuRefresh:
-			onRefreshClick();
-			return true;
-		case R.id.menuFavorite:
-			onFavoriteClick();
-			return true;
-		case R.id.menuSchedule:
-			onScheduleClick();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+    public boolean onOptionsItemSelected(MenuItem item) {
+            // Handle item selection
+            switch (item.getItemId()) {
+            case R.id.menuRefresh:
+                    onRefreshClick();
+                    return true;
+            case R.id.menuFavorite:
+                    onFavoriteClick();
+                    return true;
+            case R.id.menuSchedule:
+                    onScheduleClick();
+                    return true;
+            default:
+                    return super.onOptionsItemSelected(item);
+            }
+    }
 
 	private void onScheduleClick() {
 		String url = getString(R.string.baseScheduleUrl) + mStopID;  
