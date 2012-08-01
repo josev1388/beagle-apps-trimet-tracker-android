@@ -18,7 +18,6 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beagleapps.android.trimettracker.MainView.DownloadRoutesDataTask;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -176,9 +175,11 @@ public class FindNearby extends MapActivity {
 
 		mLocationHandler = new LocationHandler();
 		boolean success = mLocationHandler.getLocation(this, mLocationResult);
-		showGettingGPSDialog();
-		
-		if(!success){
+		if(success){
+			showGettingGPSDialog();
+		}
+		else
+		{
 			showError(getString(R.string.GPSDisabled));
 		}
 

@@ -3,19 +3,15 @@ package com.beagleapps.android.trimettracker;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-import com.beagleapps.android.trimettracker.MainView.DownloadArrivalDataTask;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;

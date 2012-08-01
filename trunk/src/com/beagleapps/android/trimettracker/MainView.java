@@ -23,14 +23,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
+import com.beagleapps.android.trimettrackerfree.DBAdapter;
+import com.beagleapps.android.trimettrackerfree.FavoriteAdapter;
 
 public class MainView extends Activity {
 	/** Called when the activity is first created. */
