@@ -21,6 +21,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beagleapps.android.trimettrackerfree.AboutItem;
+import com.beagleapps.android.trimettrackerfree.AboutScreenAdapter;
+
 public class AboutScreen extends Activity {
 	
 	private ArrayList<AboutItem> mAboutItems;

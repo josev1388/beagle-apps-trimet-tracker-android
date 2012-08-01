@@ -3,10 +3,6 @@ package com.beagleapps.android.trimettracker;
 import java.util.ArrayList;
 import java.util.Date;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -26,6 +22,12 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.beagleapps.android.trimettrackerfree.ArrivalAdapter;
+import com.beagleapps.android.trimettrackerfree.DBAdapter;
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 public class ShowStop extends Activity {
 
@@ -115,7 +117,7 @@ public class ShowStop extends Activity {
 
 	    // Initiate a generic request to load it with an ad
 	    AdRequest adRequest = new AdRequest();
-	    adRequest.addTestDevice("F51ECFD2E2C9524C7DA20C5C59C8DE1A");
+	    //adRequest.addTestDevice("F51ECFD2E2C9524C7DA20C5C59C8DE1A");
 	    vAdView.loadAd(adRequest);
 		
 	}
