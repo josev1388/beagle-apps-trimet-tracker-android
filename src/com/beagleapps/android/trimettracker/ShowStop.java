@@ -311,6 +311,8 @@ public class ShowStop extends Activity {
     }
 
 	private void onScheduleClick() {
+		stopTimers();
+		
 		String url = getString(R.string.baseScheduleUrl) + mStopID;  
 		Intent intent = new Intent(Intent.ACTION_VIEW);  
 		intent.setData(Uri.parse(url)); 
@@ -323,6 +325,8 @@ public class ShowStop extends Activity {
 	}
 
 	private void refreshArrivalData() {
+		stopTimers();
+		
 		String urlString = new String(getString(R.string.baseArrivalURL)+ 
 				mArrivalsDoc.getStopID());
 
@@ -526,6 +530,7 @@ public class ShowStop extends Activity {
 	    protected void onCancelled() {
 			isDone = true;
 			activity.resetRefreshDelay();
+			activity.resetTimers();
 	    }
 
 		
