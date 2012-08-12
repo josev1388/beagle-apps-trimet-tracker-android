@@ -8,8 +8,6 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +18,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.beagleapps.android.trimettracker.adapters.AboutItem;
+import com.beagleapps.android.trimettracker.adapters.AboutScreenAdapter;
 
 public class AboutScreen extends Activity {
 	

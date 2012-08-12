@@ -10,7 +10,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +30,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beagleapps.android.trimettracker.PreferencesHelper.Preferences;
+import com.beagleapps.android.trimettracker.adapters.DBAdapter;
+import com.beagleapps.android.trimettracker.adapters.HistoryEntryAdapter;
+import com.beagleapps.android.trimettracker.helpers.FavoritesHelper;
+import com.beagleapps.android.trimettracker.helpers.HistoryHelper;
+import com.beagleapps.android.trimettracker.helpers.PreferencesHelper;
+import com.beagleapps.android.trimettracker.helpers.PreferencesHelper.Preferences;
+import com.beagleapps.android.trimettracker.objects.HistoryEntry;
 
 public class MainView extends Activity {
 	/** Called when the activity is first created. */
@@ -152,7 +157,7 @@ public class MainView extends Activity {
 			String currentVersion = ManifestHelper.getCurrentVersion(this);
 			String dbVersion = mDbHelper.fetchVersion();
 			//showError("Manifest Version: "+currentVersion+ " DB Version: "+ dbVersion);
-			if (dbVersion.compareTo(currentVersion) != 0 || !dbVersion.equals(DBAdapter.NO_VERSION_FOUND)){
+			if (dbVersion.compareTo(currentVersion) != 0 || dbVersion.equals(DBAdapter.NO_VERSION_FOUND)){
 				mDbHelper.setCurrentVersion(currentVersion);
 				showNewFeaturesDialog();
 			}
@@ -248,7 +253,7 @@ public class MainView extends Activity {
 		CharSequence[] items = null;
 		
 		// If it's a favorite, setup a different list
-		if(FavoritesHelper.checkForFavorite(mDbHelper.getDatabase(), mStopsList.get(mLongPressValue).stopID)){
+		if(FavoritesHelper.checkForFavorite(mDbHelper.getDatabase(), mStopsList.get(mLongPressValue).getStopID())){
 			items = new CharSequence[]{
 					getText(R.string.MV_deleteFromHistory),
 					getText(R.string.MV_deleteFromFavorites),
@@ -263,7 +268,7 @@ public class MainView extends Activity {
 		builder.setTitle(getText(R.string.chooseOption));
 		builder.setItems(items, new DialogInterface.OnClickListener() {
 		    public void onClick(DialogInterface dialog, int position) {
-		    	int stopID = mStopsList.get(mLongPressValue).stopID;
+		    	int stopID = mStopsList.get(mLongPressValue).getStopID();
 		    	
 		    	switch(position){
 		    	case 0:

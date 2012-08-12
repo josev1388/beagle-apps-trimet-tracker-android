@@ -23,6 +23,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beagleapps.android.trimettracker.adapters.ArrivalAdapter;
+import com.beagleapps.android.trimettracker.adapters.DBAdapter;
+import com.beagleapps.android.trimettracker.helpers.FavoritesHelper;
+import com.beagleapps.android.trimettracker.helpers.HistoryHelper;
+import com.beagleapps.android.trimettracker.objects.Arrival;
+import com.beagleapps.android.trimettracker.objects.Favorite;
+import com.beagleapps.android.trimettracker.objects.HistoryEntry;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
