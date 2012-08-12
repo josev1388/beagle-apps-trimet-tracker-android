@@ -8,6 +8,9 @@ import android.view.Window;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.beagleapps.android.trimettracker.adapters.DetourAdapter;
+import com.beagleapps.android.trimettracker.objects.Detour;
+
 public class ShowDetour extends Activity {
 	String TAG = "showDetour";
 

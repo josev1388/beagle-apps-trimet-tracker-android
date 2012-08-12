@@ -18,6 +18,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beagleapps.android.trimettracker.adapters.StopAdapter;
+import com.beagleapps.android.trimettracker.objects.Stop;
+
 public class ChooseStop extends Activity {
 
 	private TextView vRouteDesc;
