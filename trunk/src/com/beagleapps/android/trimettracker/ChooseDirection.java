@@ -13,8 +13,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beagleapps.android.trimettrackerfree.DirectionAdapter;
-
 public class ChooseDirection extends Activity {
 	
 	private TextView vRouteDescription;

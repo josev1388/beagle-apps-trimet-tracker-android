@@ -21,9 +21,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beagleapps.android.trimettrackerfree.AboutItem;
-import com.beagleapps.android.trimettrackerfree.AboutScreenAdapter;
-
 public class AboutScreen extends Activity {
 	
 	private ArrayList<AboutItem> mAboutItems;
@@ -58,16 +55,9 @@ public class AboutScreen extends Activity {
 	private void setupCopyrightBox() {
 		vAppIcon.setImageDrawable(getResources().getDrawable(R.drawable.icon));
 		vCopyrightText.setText("© Copyright 2012 " + getString(R.string.authorName));
+
+		String version = ManifestHelper.getCurrentVersion(this);
 		
-		String version = "";
-		PackageInfo pInfo = null;
-		try {
-			pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-			version = pInfo.versionName;
-		} catch (NameNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		vVersionText.setText("Version: " + version + " by " + getString(R.string.companyName));
 		
