@@ -9,11 +9,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class FavoriteAdapter extends ArrayAdapter<Favorite> {
+public class HistoryEntryAdapter extends ArrayAdapter<HistoryEntry> {
 	private final Activity context;
-	private final ArrayList<Favorite> items;
+	private final ArrayList<HistoryEntry> items;
 
-	public FavoriteAdapter(Activity context, ArrayList<Favorite> items) {
+	public HistoryEntryAdapter(Activity context, ArrayList<HistoryEntry> items) {
 		super(context, R.layout.favorite_stop_list_item, items);
 		this.context = context;
 		this.items = items;
