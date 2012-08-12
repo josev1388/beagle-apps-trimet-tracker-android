@@ -23,8 +23,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beagleapps.android.trimettrackerfree.ArrivalAdapter;
-import com.beagleapps.android.trimettrackerfree.DBAdapter;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
@@ -37,6 +35,8 @@ public class ShowStop extends Activity {
 
 	String TAG = "ShowStop";
 	private int mStopID;
+	private int mLastVisited;
+	private int mVisits;
 
 	private ArrayList<Arrival> mArrivals = null;
 	private ArrivalAdapter mArrivalAdapter;
@@ -102,10 +102,42 @@ public class ShowStop extends Activity {
 		// Check for detours, display button
 		handleDetours();
 		
+		// Add stop to history
+		updateHistory();
+		
 		// Uncomment for the free version
 		//setupAd();
 	}
 	
+	private void updateHistory() {
+		HistoryEntry entry = HistoryHelper.getHistoryEntry(mDbHelper.getDatabase(), mStopID);
+		
+		// if entry already exists, check to see if it's old
+		if(entry != null){
+			mLastVisited = entry.getLastVisited();
+			mVisits = entry.getVisits();
+			
+			// if old, update the history, else do nothing
+			if(HistoryHelper.isOutOfDate(mLastVisited)){
+				mVisits ++;
+				mLastVisited = HistoryHelper.getCurrentTime();
+				
+				entry.setLastVisited(mLastVisited);
+				entry.setVisits(mVisits);
+				
+				HistoryHelper.updateHistory(mDbHelper.getDatabase(), entry);
+			}
+		}
+		// else make a new entry and insert it
+		else{
+			mLastVisited = HistoryHelper.getCurrentTime();
+			mVisits = 1;
+			
+			entry = constructHistoryEntry();
+			HistoryHelper.updateHistory(mDbHelper.getDatabase(), entry);
+		}
+	}
+
 	private void setupAd() {
 		// Create the adView
 		vAdView = new AdView(this, AdSize.BANNER, getString(R.string.admob_publisher_id));
@@ -233,6 +265,9 @@ public class ShowStop extends Activity {
 		if (mDownloadArrivalTask != null){
 			mDownloadArrivalTask.detach();
 		}
+		
+		mDbHelper.close();
+		
 		super.onDestroy();
 	}
 
@@ -265,7 +300,7 @@ public class ShowStop extends Activity {
 	private boolean isStopFavorite() {
 		int stopID = mArrivalsDoc.getStopID();
 
-		mIsFavorite = mDbHelper.checkForFavorite(stopID);
+		mIsFavorite = FavoritesHelper.checkForFavorite(mDbHelper.getDatabase(), stopID);
 
 		return mIsFavorite;
 	}
@@ -349,12 +384,12 @@ public class ShowStop extends Activity {
 	private void onFavoriteClick() {
 		if (isStopFavorite()){
 			// Remove stop from favorites
-			mDbHelper.deleteFavorite(mStopID);
+			FavoritesHelper.deleteFavorite(mDbHelper.getDatabase(), mStopID);
 			ShowRemovedToast();
 		}
 		else{
 			// Add stop to favorites
-			mDbHelper.createFavorite(constructFavorite());
+			FavoritesHelper.createFavorite(mDbHelper.getDatabase(), constructFavorite());
 			ShowAddedToast();
 		}
 
@@ -380,6 +415,21 @@ public class ShowStop extends Activity {
 			fav.setRoutes(routes);
 		}
 		return fav;
+	}
+	
+	private HistoryEntry constructHistoryEntry() {
+		HistoryEntry entry = new HistoryEntry();
+		if (mArrivalsDoc != null){
+			entry.setDescription(mArrivalsDoc.getStopDescription());
+			entry.setStopID(mArrivalsDoc.getStopID());
+			entry.setDirection(mArrivalsDoc.getDirection());
+			String routes = RoutesUtilities.parseRouteList(mArrivalsDoc.getRouteList());
+			entry.setRoutes(routes);
+			
+			entry.setLastVisited(mLastVisited);
+			entry.setVisits(mVisits);
+		}
+		return entry;
 	}
 
 	@Override

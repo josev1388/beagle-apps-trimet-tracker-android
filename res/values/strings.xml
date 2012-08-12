@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="hello">Hello World, homepage!</string>
-    <string name="app_name">Trimet Tracker</string>
+    <string name="app_name">TriMet Tracker</string>
     <string name="homepageAddString">Add</string>
     <string name="homepageGo">Go</string>
     <string name="homepageFindStop">Find A Stop</string>
@@ -77,4 +77,17 @@
     <string name="GPSDisabled">Problem: GPS is not enabled on your device</string>
     <string name="admob_publisher_id">a14fee70c1792b4</string>
     <string name="FN_Title">Find A Nearby Stop</string>
+    <string name="MV_favorites">Favorites</string>
+    <string name="MV_allStops">All Stops</string>
+    <string name="MV_sortMostRecent">Recent</string>
+    <string name="MV_sortMostVisited">Visits</string>
+    <string name="MV_sortStopID">Stop ID</string>
+    <string name="chooseSortMethod">Sort by</string>
+    <string name="chooseDisplayChoice">Which stops to show</string>
+    <string name="MV_deleteFromHistory">Remove from history</string>
+    <string name="MV_deleteFromFavorites">Remove from favorites</string>
+    <string name="MV_deleteFromBoth">Remove from both</string>
+    <string name="chooseOption">Choose an option</string>
+    <string name="MV_displayChoiceLabel">Show:</string>
+    <string name="MV_sortLabel">Sort By:</string>
 </resources>

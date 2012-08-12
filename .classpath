@@ -3,6 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="adapters"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="src" path="helpers"/>
+	<classpathentry kind="src" path="objects"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="lib" path="libs/GoogleAdMobAdsSdk-6.1.0.jar"/>

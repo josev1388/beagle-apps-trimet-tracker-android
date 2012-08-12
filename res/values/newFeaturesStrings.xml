@@ -1,5 +1,3 @@
-
 <resources>
-    <string name="PopupMessage">New Features: \n* Added support for older devices</string>
-    <string name="PopupTitle">TriMet Tracker 1.0</string>
+    <string name="PopupMessage">What\'s new: \n\n• Now keeps track of the stops you have visited.\n• Can now sort by \"Most Visited\", and \"Most Recent\".\n• Fixed a bug causing \"Find Nearby Stops\" to force close.\n</string>
 </resources>

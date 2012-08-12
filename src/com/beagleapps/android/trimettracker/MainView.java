@@ -4,11 +4,13 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,14 +23,15 @@ import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beagleapps.android.trimettrackerfree.DBAdapter;
-import com.beagleapps.android.trimettrackerfree.FavoriteAdapter;
+import com.beagleapps.android.trimettracker.PreferencesHelper.Preferences;
 
 public class MainView extends Activity {
 	/** Called when the activity is first created. */
@@ -36,8 +39,8 @@ public class MainView extends Activity {
 	@SuppressWarnings("unused")
 	private static String TAG = "homepage";
 
-	private ArrayList<Favorite> mFavorites = null;
-	private FavoriteAdapter mFavoriteAdapter;
+	private ArrayList<HistoryEntry> mStopsList = null;
+	private HistoryEntryAdapter mFavoriteAdapter;
 	private DBAdapter mDbHelper;
 
 	private ListView vFavoriteStopsListView;
@@ -47,6 +50,10 @@ public class MainView extends Activity {
 
 	private TextView vStopIDTextBox;
 	private Button vGoButton;
+	private TextView vSortText;
+	private TextView vDisplayChoiceText;
+	private RelativeLayout vSortButton;
+	private RelativeLayout vDisplayChoiceButton;
 
 	private static ArrivalsDocument mArrivalsDoc;
 	ArrayAdapter<String> mListViewAdapter;
@@ -55,6 +62,14 @@ public class MainView extends Activity {
 	private DownloadRoutesDataTask mDownloadRoutesTask = null;
 	private ProgressDialog mArrivalsDialog;
 	private ProgressDialog mRoutesDialog;
+
+	private AlertDialog mChooseSortAlert;
+
+	private AlertDialog mChooseDisplayChoiceAlert;
+
+	private AlertDialog mLongPressAlert;
+
+	private int mLongPressValue;
 
 
 	@Override
@@ -68,14 +83,16 @@ public class MainView extends Activity {
 
 		vFavoriteStopsListView = (ListView)findViewById(R.id.favoriteStopsListView);
 		vEmptyView = (View)findViewById(R.id.HP_emptyView);
-		vGoButton = (Button)findViewById(R.id.goButton);
+		
+		setupButtons();
+		
 		vStopIDTextBox = (TextView)findViewById(R.id.stopIDTextBox);
 
-		mFavorites = new ArrayList<Favorite>();
+		mStopsList = new ArrayList<HistoryEntry>();
 
-		getFavorites();
+		getStopsFromDatabase();
 
-		mFavoriteAdapter = new FavoriteAdapter(this, mFavorites);
+		mFavoriteAdapter = new HistoryEntryAdapter(this, mStopsList);
 		vFavoriteStopsListView.setAdapter(mFavoriteAdapter);
 		
 		vFavoriteStopsListView.setEmptyView(vEmptyView);
@@ -88,12 +105,54 @@ public class MainView extends Activity {
 	}
 
 
+	public void setupButtons() {
+		vGoButton = (Button)findViewById(R.id.goButton);
+		vSortText = (TextView)findViewById(R.id.MV_sortChoice);
+		vDisplayChoiceText = (TextView)findViewById(R.id.MV_displayChoice);
+		vDisplayChoiceButton = (RelativeLayout)findViewById(R.id.MV_displayChoiceButton);
+		vSortButton = (RelativeLayout)findViewById(R.id.MV_sortChoiceButton);
+
+		refreshSortButton();
+		refreshDisplayChoiceButton();
+	}
+
+
+	public void refreshSortButton() {
+		switch(PreferencesHelper.getSort(mDbHelper.getDatabase())){
+		case VISITS:
+			vSortText.setText(getText(R.string.MV_sortMostVisited));
+			break;
+		case TIME:
+			vSortText.setText(getText(R.string.MV_sortMostRecent));
+			break;
+		case STOPID:
+			vSortText.setText(getText(R.string.MV_sortStopID));
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void refreshDisplayChoiceButton() {
+		switch(PreferencesHelper.getDisplayChoice(mDbHelper.getDatabase())){
+		case ALL:
+			vDisplayChoiceText.setText(getText(R.string.MV_allStops));
+			break;
+		case FAVORITES:
+			vDisplayChoiceText.setText(getText(R.string.MV_favorites));
+			break;
+		default:
+			break;
+		}
+	}
+
+
 	private void checkVersion() {
 		try {
-			String currentVersion = ManifestUtils.getCurrentVersion(this);
+			String currentVersion = ManifestHelper.getCurrentVersion(this);
 			String dbVersion = mDbHelper.fetchVersion();
 			//showError("Manifest Version: "+currentVersion+ " DB Version: "+ dbVersion);
-			if (dbVersion.compareTo(currentVersion) != 0 && !dbVersion.equals(mDbHelper.NO_VERSION_FOUND)){
+			if (dbVersion.compareTo(currentVersion) != 0 || !dbVersion.equals(DBAdapter.NO_VERSION_FOUND)){
 				mDbHelper.setCurrentVersion(currentVersion);
 				showNewFeaturesDialog();
 			}
@@ -114,13 +173,122 @@ public class MainView extends Activity {
 				}
 			}
 		});
+		
+		vSortButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				showSortDialog();
+			}
+		});
+		
+		vDisplayChoiceButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				showDisplayChoiceDialog();
+			}
+		});
 
 		vFavoriteStopsListView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> a, View v, int position, long id) {
-				onStopClick(mFavorites.get(position).getStopID());
+				onStopClick(mStopsList.get(position).getStopID());
+			}
+		});
+		
+		vFavoriteStopsListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				showLongPressDialog(position);
+				return true;
 			}
 		});
 	}
+
+	protected void showDisplayChoiceDialog() {
+		final CharSequence[] items = {getText(R.string.MV_allStops), getText(R.string.MV_favorites)};
+		
+		int currentDisplayChoice = PreferencesHelper.getPreference(mDbHelper.getDatabase(), Preferences.DISPLAY_CHOICE).value;
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getText(R.string.chooseDisplayChoice));
+		builder.setSingleChoiceItems(items, currentDisplayChoice, new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int newDisplayChoice) {
+		        PreferencesHelper.setDisplayChoice(mDbHelper.getDatabase(), newDisplayChoice);
+		        refreshDisplayChoiceButton();
+		        mChooseDisplayChoiceAlert.dismiss();
+		    }
+		});
+		mChooseDisplayChoiceAlert = builder.create();
+		
+		mChooseDisplayChoiceAlert.show();
+	}
+
+
+	protected void showSortDialog() {
+		final CharSequence[] items = {
+			getText(R.string.MV_sortMostVisited),
+			getText(R.string.MV_sortMostRecent),
+			getText(R.string.MV_sortStopID)
+		};
+		
+		int currentSort = PreferencesHelper.getPreference(mDbHelper.getDatabase(), Preferences.SORT).value;
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getText(R.string.chooseSortMethod));
+		builder.setSingleChoiceItems(items, currentSort, new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int newSort) {
+		        PreferencesHelper.setSort(mDbHelper.getDatabase(), newSort);
+		        refreshSortButton();
+		        mChooseSortAlert.dismiss();
+		    }
+		});
+		mChooseSortAlert = builder.create();
+		
+		mChooseSortAlert.show();
+	}
+	
+	protected void showLongPressDialog(int position) {
+		mLongPressValue = position;
+		CharSequence[] items = null;
+		
+		// If it's a favorite, setup a different list
+		if(FavoritesHelper.checkForFavorite(mDbHelper.getDatabase(), mStopsList.get(mLongPressValue).stopID)){
+			items = new CharSequence[]{
+					getText(R.string.MV_deleteFromHistory),
+					getText(R.string.MV_deleteFromFavorites),
+					getText(R.string.MV_deleteFromBoth)
+			};
+		}
+		else{
+			items = new CharSequence[]{getText(R.string.MV_deleteFromHistory)};
+		}
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getText(R.string.chooseOption));
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int position) {
+		    	int stopID = mStopsList.get(mLongPressValue).stopID;
+		    	
+		    	switch(position){
+		    	case 0:
+		    		// Delete from history
+		    		HistoryHelper.deleteHistoryEntry(mDbHelper.getDatabase(), stopID);
+		    		break;
+		    	case 1:
+		    		// Delete from favs
+		    		FavoritesHelper.deleteFavorite(mDbHelper.getDatabase(), stopID);
+		    		break;
+		    	case 2:
+		    		// Delete from both
+		    		HistoryHelper.deleteHistoryEntry(mDbHelper.getDatabase(), stopID);
+		    		FavoritesHelper.deleteFavorite(mDbHelper.getDatabase(), stopID);
+		    		break;
+		    	}
+		        
+		    	mLongPressAlert.dismiss();
+		    }
+		});
+		mLongPressAlert = builder.create();
+		
+		mLongPressAlert.show();
+	}
+
 
 	// Resumes the dialog if an async task is still in progress after rotation
 	private void handleRotation() {
@@ -194,8 +362,10 @@ public class MainView extends Activity {
 	private void showNewFeaturesDialog() {
 		try {
 			final Dialog dialog = new Dialog(MainView.this);
+			String title = getString(R.string.app_name) + " " +ManifestHelper.getCurrentVersion(this);
+			
 	        dialog.setContentView(R.layout.welcome_popup);
-	        dialog.setTitle(R.string.PopupTitle);
+	        dialog.setTitle(title);
 	        dialog.setCancelable(true);
 
 	        //set up text
@@ -243,12 +413,12 @@ public class MainView extends Activity {
 	@Override 
 	protected void onDestroy(){
 		super.onDestroy();
-		//mDbHelper.close();
+		mDbHelper.close();
 	}
 
 	public void onWindowFocusChanged (boolean hasFocus){
 		if(hasFocus){
-			getFavorites();
+			getStopsFromDatabase();
 			mFavoriteAdapter.notifyDataSetChanged();
 		}
 	}
@@ -286,26 +456,18 @@ public class MainView extends Activity {
 	}
 
 
-	private void getFavorites() {
-		Cursor cursor = mDbHelper.fetchAllFavorites();
+	private void getStopsFromDatabase() {
+		Cursor cursor = HistoryHelper.fetchStopsUsingPrefs(mDbHelper.getDatabase());
 		cursor.moveToFirst();
 
-		mFavorites.clear();
+		mStopsList.clear();
 		while (!cursor.isAfterLast()){
-			Favorite fav = constructFavoriteFromCursor(cursor); 
-			mFavorites.add(fav);
+			HistoryEntry stop = HistoryHelper.constructHistoryFromCursor(cursor); 
+			mStopsList.add(stop);
 			cursor.moveToNext();
 		}
-	}
-
-
-	private Favorite constructFavoriteFromCursor(Cursor cursor) {
-		Favorite fav = new Favorite();
-		fav.setDescription(cursor.getString(cursor.getColumnIndex(DBAdapter.KEY_DESCRIPTION)));
-		fav.setStopID(cursor.getInt(cursor.getColumnIndex(DBAdapter.KEY_STOPID)));
-		fav.setDirection(cursor.getString(cursor.getColumnIndex(DBAdapter.KEY_DIRECTION)));
-		fav.setRoutes(cursor.getString(cursor.getColumnIndex(DBAdapter.KEY_ROUTES)));
-		return fav;
+		
+		cursor.close();
 	}
 
 

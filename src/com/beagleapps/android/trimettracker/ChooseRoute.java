@@ -20,8 +20,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beagleapps.android.trimettrackerfree.RouteAdapter;
-
 public class ChooseRoute extends Activity {
 	
 	private DownloadRoutesDataTask mDownloadRoutesDataTask = null;
