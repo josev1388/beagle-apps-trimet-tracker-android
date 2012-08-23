@@ -14,7 +14,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +29,8 @@ import com.google.android.maps.OverlayItem;
 
 public class FindNearby extends MapActivity {
 	private MapView vMapView;
+	private RelativeLayout vRefreshButton;
+	
 	private LocationHandler.LocationResult mLocationResult;
 	private Location mCurrentLocation;
 	private StopItemizedOverlay mStopOverlay;
@@ -49,6 +53,7 @@ public class FindNearby extends MapActivity {
 
 		vRouteFilterTextView = (TextView)findViewById(R.id.FNB_FilterTextBox);
 		vMapView = (MapView) findViewById(R.id.FNBMapView);
+		vRefreshButton = (RelativeLayout) findViewById(R.id.FN_refreshButton);
 		vMapView.setBuiltInZoomControls(true);
 
 		mCurrentLocation = null;
@@ -62,28 +67,6 @@ public class FindNearby extends MapActivity {
 		// TODO I'm disabling rotation for now, might fix later
 		//handleRotation();
 
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.find_nearby_menu, menu);
-		return true;
-	}
-	
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		return super.onPrepareOptionsMenu(menu);
-	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.menuRefresh) {
-			onRefreshClick();
-			return true;
-		} else {
-			return super.onOptionsItemSelected(item);
-		}
 	}
 	
 	private void onRefreshClick() {
@@ -114,6 +97,12 @@ public class FindNearby extends MapActivity {
 	}
 	
 	private void setupListeners() {
+		
+		vRefreshButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				onRefreshClick();
+			}
+		});
 		
 		vRouteFilterTextView.addTextChangedListener(new TextWatcher() {
 			
@@ -215,10 +204,38 @@ public class FindNearby extends MapActivity {
 
 	private void centerMapOnLocation(Location location) {
 		MapController mapController = vMapView.getController();
-
-		GeoPoint currentGeoPoint = getGeoPoint(location);
-		mapController.setCenter(currentGeoPoint);
+		
 		mapController.setZoom(16);
+		mapController.animateTo(getGeoPoint(location));
+	}
+	
+	
+	// Must be called after stops have been retrieved from trimet and gps has returned a location
+	private void centerMapOnStops() {
+		MapController mapController = vMapView.getController();
+		
+		int minLat = Integer.MAX_VALUE;
+		int maxLat = Integer.MIN_VALUE;
+		int minLon = Integer.MAX_VALUE;
+		int maxLon = Integer.MIN_VALUE;
+		
+		int length = mStopsDocument.lengthLocations();
+		for(int i = 0; i < length; i++){
+			GeoPoint geoPoint = getGeoPoint(mStopsDocument.getLat(i), mStopsDocument.getLon(i));
+			
+			int lat = geoPoint.getLatitudeE6();
+			int lon = geoPoint.getLongitudeE6();
+			
+			maxLat = Math.max(lat, maxLat);
+			minLat = Math.min(lat, minLat);
+			maxLon = Math.max(lon, maxLon);
+			minLon = Math.min(lon, minLon);
+		 }
+
+		double fitFactor = 1.0;
+		mapController.zoomToSpan((int) (Math.abs(maxLat - minLat) * fitFactor), (int)(Math.abs(maxLon - minLon) * fitFactor));
+		//mapController.setZoom(16);
+		mapController.animateTo(getGeoPoint(mCurrentLocation));
 	}
 
 	@Override
@@ -250,7 +267,9 @@ public class FindNearby extends MapActivity {
 			for(int j = 0; j < mStopsDocument.lengthRoutes(i); j++){
 				String routeNumber = mStopsDocument.getRouteNumber(i, j);
 				String routeDesc = mStopsDocument.getRouteDesc(i, j);
-				if(routeFilter == null || routeNumber.toLowerCase().contains(routeFilter)){
+				
+				// Retrieves the name of the route if applicable (e.g. for Max lines), compares to the route filter
+				if(routeFilter == null || RoutesHelper.getRouteName(routeNumber).toLowerCase().contains(routeFilter.toLowerCase())){
 					routeList.add(new Route(routeDesc, routeNumber));
 				}
 			}
@@ -353,6 +372,7 @@ public class FindNearby extends MapActivity {
 					NearbyStopsDocument.setXMLDoc(newXmlHandler.getXmlDoc());
 				
 					activity.setupStopsOverylay();
+					activity.centerMapOnStops();
 				}
 			}
 			else{

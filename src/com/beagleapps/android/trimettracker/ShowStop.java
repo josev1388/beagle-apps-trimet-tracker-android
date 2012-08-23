@@ -82,21 +82,13 @@ public class ShowStop extends Activity {
 		mDbHelper = new DBAdapter(this);
 		mDbHelper.open();
 
-		vArrivalsListView = (ListView)findViewById(R.id.SS_ArrivalsListView);
-		vEmptyView = (View)findViewById(R.id.SS_emptyView);
-		vStopTitle = (TextView)findViewById(R.id.SS_StopTitle);
-		vDirection= (TextView)findViewById(R.id.SS_StopID);
-		vDetourButton = (Button)findViewById(R.id.SS_DetourButton);
-		vBottomBar = (LinearLayout)findViewById(R.id.SS_BottomBar);
-		vBottomDivider = (View)findViewById(R.id.SS_BottomDivider);
-
 		mArrivals = new ArrayList<Arrival>();
 		mArrivalsDoc = new ArrivalsDocument();
-
 		mStopID = mArrivalsDoc.getStopID();
-		vDirection.setText(mArrivalsDoc.getDirection());
-		vStopTitle.setText(mStopID + ": " + mArrivalsDoc.getStopDescription());
-
+		setupViews();
+		
+		
+		
 		getArrivals();
 
 		mArrivalAdapter = new ArrivalAdapter(this, mArrivals);
@@ -114,6 +106,19 @@ public class ShowStop extends Activity {
 		
 		// Uncomment for the free version
 		//setupAd();
+	}
+
+	public void setupViews() {
+		vArrivalsListView = (ListView)findViewById(R.id.SS_ArrivalsListView);
+		vEmptyView = (View)findViewById(R.id.SS_emptyView);
+		vStopTitle = (TextView)findViewById(R.id.SS_StopTitle);
+		vDirection= (TextView)findViewById(R.id.SS_StopID);
+		vDetourButton = (Button)findViewById(R.id.SS_DetourButton);
+		vBottomBar = (LinearLayout)findViewById(R.id.SS_BottomBar);
+		vBottomDivider = (View)findViewById(R.id.SS_BottomDivider);
+		
+		vDirection.setText(mArrivalsDoc.getDirection());
+		vStopTitle.setText(mStopID + ": " + mArrivalsDoc.getStopDescription());
 	}
 	
 	private void updateHistory() {
@@ -214,7 +219,7 @@ public class ShowStop extends Activity {
 	}
 	
 	private void onDetourClick() {
-		String routeListString = RoutesUtilities.join(mArrivalsDoc.getRouteList(), ",");
+		String routeListString = RoutesHelper.join(mArrivalsDoc.getRouteList(), ",");
 		String urlString = new String(getString(R.string.baseDetourUrl) + routeListString);
 
 
@@ -345,7 +350,10 @@ public class ShowStop extends Activity {
                     onFavoriteClick();
                     return true;
             case R.id.menuSchedule:
-                    onScheduleClick();
+	                onScheduleClick();
+	                return true;
+            case R.id.menuShowOnMap:
+                    onMapClick();
                     return true;
             default:
                     return super.onOptionsItemSelected(item);
@@ -358,6 +366,18 @@ public class ShowStop extends Activity {
 		String url = getString(R.string.baseScheduleUrl) + mStopID;  
 		Intent intent = new Intent(Intent.ACTION_VIEW);  
 		intent.setData(Uri.parse(url)); 
+		startActivity(intent);  
+	}
+	
+	private void onMapClick() {
+		stopTimers();
+		
+		Intent intent = new Intent(getApplicationContext(), ShowStopMap.class);
+		intent.putExtra("stopDescription", mArrivalsDoc.getStopDescription());
+		intent.putExtra("stopID", mArrivalsDoc.getStopID());
+		intent.putExtra("latitude", mArrivalsDoc.getLatitude());
+		intent.putExtra("longitude", mArrivalsDoc.getLongitude());
+ 
 		startActivity(intent);  
 	}
 
@@ -418,7 +438,7 @@ public class ShowStop extends Activity {
 			fav.setDescription(mArrivalsDoc.getStopDescription());
 			fav.setStopID(mArrivalsDoc.getStopID());
 			fav.setDirection(mArrivalsDoc.getDirection());
-			String routes = RoutesUtilities.parseRouteList(mArrivalsDoc.getRouteList());
+			String routes = RoutesHelper.parseRouteList(mArrivalsDoc.getRouteList());
 			fav.setRoutes(routes);
 		}
 		return fav;
@@ -430,7 +450,7 @@ public class ShowStop extends Activity {
 			entry.setDescription(mArrivalsDoc.getStopDescription());
 			entry.setStopID(mArrivalsDoc.getStopID());
 			entry.setDirection(mArrivalsDoc.getDirection());
-			String routes = RoutesUtilities.parseRouteList(mArrivalsDoc.getRouteList());
+			String routes = RoutesHelper.parseRouteList(mArrivalsDoc.getRouteList());
 			entry.setRoutes(routes);
 			
 			entry.setLastVisited(mLastVisited);

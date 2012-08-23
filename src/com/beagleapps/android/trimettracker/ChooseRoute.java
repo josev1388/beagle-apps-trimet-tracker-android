@@ -129,7 +129,7 @@ public class ChooseRoute extends Activity {
 				String desc = mRoutesDocument.getRouteDescription(index);
 				String number = mRoutesDocument.getRouteNumber(index);
 				
-				if (!RoutesUtilities.isExcludedRoute(number)){
+				if (!RoutesHelper.isExcludedRoute(number)){
 					mRouteList.add(new Route(desc, number));
 				}
 			}

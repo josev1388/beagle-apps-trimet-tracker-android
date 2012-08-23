@@ -9,6 +9,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import android.location.Location;
+
 public class ArrivalsDocument extends XMLDocument{
 
 	private static final String[] DaysOfWeek = 
@@ -31,6 +33,20 @@ public class ArrivalsDocument extends XMLDocument{
 		Node locationNode = nodeList.item(0);
 		String stopString = getAttributeValue(locationNode, "locid"); 
 		return Integer.parseInt(stopString);
+	}
+	
+	public float getLatitude(){
+		NodeList nodeList = mXMLDoc.getElementsByTagName("location");
+		Node locationNode = nodeList.item(0);
+
+		return Float.parseFloat(getAttributeValue(locationNode, "lat"));
+	}
+	
+	public float getLongitude(){
+		NodeList nodeList = mXMLDoc.getElementsByTagName("location");
+		Node locationNode = nodeList.item(0);
+
+		return Float.parseFloat(getAttributeValue(locationNode, "lng"));
 	}
 	
 	public NodeList getArrivalNodes(){
