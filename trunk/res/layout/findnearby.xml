@@ -16,11 +16,54 @@
 		<View android:background="@drawable/divider_white"
 			android:layout_width="fill_parent" android:layout_height="1px"
 			android:id="@+id/divider_"></View>
-		<TextView android:textSize="22sp" android:paddingLeft="10dp"
-			android:text="@string/FN_Title" android:id="@+id/FN_Title"
-			android:paddingRight="10dp" android:layout_height="wrap_content"
-			android:paddingTop="5dp" android:layout_width="wrap_content"
-			android:layout_gravity="center" android:paddingBottom="5dp"></TextView>
+
+		<LinearLayout
+		    android:id="@+id/FN_topBarHorizontal"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content" >
+
+			<LinearLayout
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="1"
+			    android:orientation="vertical" >
+
+				<TextView
+				    android:id="@+id/FN_Title"
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:layout_gravity="center_horizontal"
+				    android:layout_weight="1"
+				    android:paddingBottom="5dp"
+				    android:paddingLeft="10dp"
+				    android:paddingRight="10dp"
+				    android:paddingTop="5dp"
+				    android:text="@string/FN_Title"
+				    android:textSize="22sp" />
+
+			</LinearLayout>
+
+		    <ImageView style="@style/TitleBarSeparatorDark" />
+
+		    <ImageView style="@style/TitleBarSeparatorLight" />
+
+		    <RelativeLayout
+		        android:id="@+id/FN_refreshButton"
+		        style="@style/GradiantButton"
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:background="@drawable/gradiant_button"
+		        android:minWidth="40dp" >
+
+		        <ImageView
+		            android:id="@+id/FN_refreshImage"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:src="@drawable/ic_menu_refresh" />
+
+		    </RelativeLayout>
+		</LinearLayout>
+
 		<View android:background="@drawable/divider_black"
 			android:layout_width="fill_parent" android:layout_height="1px"
 			android:id="@+id/divider_"></View>

@@ -49,7 +49,7 @@ public class DetoursDocument extends XMLDocument{
 			routeList.add(getAttributeValue(routeNodes.item(i), "route"));
 		}
 		
-		return RoutesUtilities.parseRouteList(routeList);
+		return RoutesHelper.parseRouteList(routeList);
 	}
 
 	private NodeList getRoutes(int index) {
